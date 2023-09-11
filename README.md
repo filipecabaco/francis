@@ -2,7 +2,7 @@
 
 > Nothing is stable! Try it out with caution
 
-Simple boilerplate killer using Plug and Bandit inspired by [Sinatra](sinatrarb.com) for Ruby
+Simple boilerplate killer using Plug and Bandit inspired by [Sinatra](https://sinatrarb.com) for Ruby
 
 ## Installation
 
@@ -30,4 +30,4 @@ defmodule Example do
   unmatched(fn _ -> "not found" end)
 end
 ```
-Check the folder (example)[/example] to check the code.
+Check the folder [example](example) to check the code.
