@@ -30,4 +30,4 @@ defmodule Example do
   unmatched(fn _ -> "not found" end)
 end
 ```
-Check the folder (example)[/example] to check the code.
+Check the folder [example](example) to check the code.
