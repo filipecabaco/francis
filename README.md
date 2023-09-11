@@ -2,7 +2,7 @@
 
 > Nothing is stable! Try it out with caution
 
-Simple boilerplate killer using Plug and Bandit inspired by [Sinatra](sinatrarb.com) for Ruby
+Simple boilerplate killer using Plug and Bandit inspired by [Sinatra](https://sinatrarb.com) for Ruby
 
 ## Installation
 
