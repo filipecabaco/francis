@@ -1,4 +1,4 @@
-# Frank
+# Francis
 
 > Nothing is stable! Try it out with caution
 
@@ -7,7 +7,7 @@ Simple boilerplate killer using Plug and Bandit inspired by [Sinatra](https://si
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `frank` to your list of dependencies in `mix.exs`:
+by adding `francis` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
