@@ -1,27 +1,43 @@
-defmodule Frank.MixProject do
+defmodule Francis.MixProject do
   use Mix.Project
+
+  @version "0.1.0-pre"
 
   def project do
     [
+      name: "Francis",
       app: :francis,
-      version: "0.1.0-pre",
+      version: @version,
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      package: [
-        files: ["lib", "test", "mix.exs", "README*", "LICENSE*"],
-        maintainers: ["Filipe Cabaço"],
-        licenses: ["MIT"],
-        links: %{"GitHub" => "https://github.com/filipecabaco/francis"}
-      ],
+      package: package(),
+      docs: docs(),
+      source_url: "https://github.com/filipecabaco/francis",
       description:
         "A simple wrapper around Plug and Bandit to reduce boilerplate for simple APIs",
-      source_url: "https://github.com/filipecabaco/francis"
     ]
   end
 
   def application do
     [extra_applications: [:logger]]
+  end
+
+  defp package do
+    [
+      files: ["lib", "test", "mix.exs", "README*", "LICENSE*"],
+      maintainers: ["Filipe Cabaço"],
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/filipecabaco/francis"}
+    ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      extras: ["README.md"],
+      formatters: ["html", "epub"]
+    ]
   end
 
   # Run "mix help deps" to learn about dependencies.
