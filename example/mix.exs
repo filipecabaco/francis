@@ -19,7 +19,9 @@ defmodule Example.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:francis, "~> 0.1.0-pre"}
+      {:francis, path: "../"},
+      {:floki, "~> 0.34.0", only: [:test]},
+      {:req, "~> 0.4.0", only: [:test]}
     ]
   end
 end

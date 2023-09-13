@@ -1,8 +1,12 @@
 defmodule ExampleTest do
   use ExUnit.Case
-  doctest Example
+
+  test "index returns valid html" do
+    html = Req.get!("/", plug: Example).body
+    assert {:ok, _html_tree} = Floki.parse_document(html)
+  end
 
   test "greets the world" do
-    assert Example.hello() == :world
+    assert Req.get!("/world", plug: Example).body == "hello world"
   end
 end
