@@ -53,6 +53,7 @@ end
   end
   
   Example.start(nil, nil)
+  Process.sleep(:infinity)
   # run this file with elixir server.ex
 ```
 
