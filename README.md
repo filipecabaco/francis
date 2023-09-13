@@ -30,4 +30,30 @@ defmodule Example do
   unmatched(fn _ -> "not found" end)
 end
 ```
+
+## Example using it with Mix.install
+```elixir
+  # create a new file called server.ex
+  Mix.install([:francis])
+  
+  defmodule Example do
+    use Francis
+  
+    get("/", fn _ -> "<html>world</html>" end)
+    get("/:name", fn %{params: %{"name" => name}} -> "hello #{name}" end)
+  
+    ws("ws", fn "ping" -> "pong" end)
+  
+    unmatched(fn _ -> "not found" end)
+  
+    def start(_, _) do
+      children = [{Bandit, [plug: __MODULE__]}]
+      Supervisor.start_link(children, strategy: :one_for_one)
+    end
+  end
+  
+  Example.start(nil, nil)
+  # run this file with elixir server.ex
+```
+
 Check the folder [example](example) to check the code.
