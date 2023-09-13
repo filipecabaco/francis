@@ -13,6 +13,8 @@ defmodule Example do
 
   get("/:name", fn %{params: %{"name" => name}} -> "hello #{name}" end)
 
+  get("/api/user", fn _ -> %{user: %{name: "Filipe Cabaço", github: "filipecabaco"}} end)
+
   ws("ws", fn "ping" -> "pong" end)
 
   unmatched(fn _ -> "not found" end)
