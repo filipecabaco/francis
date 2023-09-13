@@ -3,7 +3,9 @@ defmodule ExampleTest do
 
   test "index returns valid html" do
     html = Req.get!("/", plug: Example).body
-    assert {:ok, _html_tree} = Floki.parse_document(html)
+
+    assert {:ok, [{"html", [], [{"body", [], [{"h1", [], ["Hello, world!"]}]}]}]} =
+             Floki.parse_document(html)
   end
 
   test "greets the world" do
