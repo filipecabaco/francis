@@ -36,7 +36,6 @@ defmodule Francis.MixProject do
     [
       main: "readme",
       extras: ["README.md"],
-      source_ref: "v#{@version}",
       formatters: ["html", "epub"]
     ]
   end
