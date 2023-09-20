@@ -31,6 +31,12 @@ defmodule Francis do
 
       plug(Plug.Logger, Keyword.get(unquote(opts), :logger_opts, []))
       plug(:match)
+
+      Enum.map(Keyword.get(unquote(opts), :plugs, []), fn
+        plug when is_atom(plug) -> plug(plug)
+        {plug, opts} when is_atom(plug) -> plug(plug, opts)
+      end)
+
       plug(:dispatch)
     end
   end
