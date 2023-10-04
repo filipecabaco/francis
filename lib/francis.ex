@@ -6,7 +6,10 @@ defmodule Francis do
       use Application
 
       def start(_type, _args) do
-        children = [{Bandit, [plug: __MODULE__] ++ Keyword.get(unquote(opts), :bandit_opts, [])}]
+        children = [
+          {Bandit, [plug: __MODULE__] ++ Keyword.get(unquote(opts), :bandit_opts, [])}
+        ]
+
         Supervisor.start_link(children, strategy: :one_for_one)
       end
 
@@ -14,6 +17,9 @@ defmodule Francis do
 
       defp handle_resp(handler, conn, status \\ 200) do
         case handler.(conn) do
+          res when is_struct(res, Plug.Conn) ->
+            res
+
           res when is_binary(res) ->
             conn
             |> send_resp(status, res)
@@ -29,7 +35,6 @@ defmodule Francis do
 
       use Francis.Plug.Router
 
-      plug(Plug.Logger, Keyword.get(unquote(opts), :logger_opts, []))
       plug(:match)
 
       Enum.map(Keyword.get(unquote(opts), :plugs, []), fn
@@ -72,48 +77,53 @@ defmodule Francis do
   end
 
   defmacro ws(path, handler) do
-    quote location: :keep do
-      import WebSockAdapter
+    module_name =
+      path
+      |> URI.parse()
+      |> then(& &1.path)
+      |> then(&String.split(&1, "/"))
+      |> Enum.map(&String.capitalize/1)
+      |> Enum.join(".")
+      |> then(&"#{__MODULE__}.#{&1}")
+      |> String.to_atom()
 
-      module_name =
-        unquote(
-          path
-          |> URI.parse()
-          |> then(& &1.path)
-          |> then(&String.split(&1, "/"))
-          |> Enum.map(&String.capitalize/1)
-          |> Enum.join(".")
-        )
+    handler_ast =
+      quote do
+        defmodule unquote(module_name) do
+          require WebSockAdapter
 
-      defmodule :"#{__MODULE__}.#{module_name}" do
-        require Logger
-        def init(_opts), do: {:ok, %{}}
+          require Logger
+          def init(_opts), do: {:ok, %{}}
 
-        def handle_in(message, state) do
-          case unquote(handler).(elem(message, 0)) do
-            res when is_binary(res) ->
-              {:push, [{:text, res}], state}
+          def handle_in(message, state) do
+            case unquote(handler).(elem(message, 0)) do
+              res when is_binary(res) ->
+                {:push, [{:text, res}], state}
 
-            res when is_map(res) ->
-              {:push, [{:text, Jason.encode!(res)}], state}
+              res when is_map(res) ->
+                {:push, [{:text, Jason.encode!(res)}], state}
+            end
+          rescue
+            e ->
+              Logger.error("WS Handler error: #{inspect(e)} ")
+              {:stop, :error, e}
           end
-        rescue
-          e ->
-            Logger.error("WS Handler error: #{inspect(e)} ")
-            {:stop, :error, e}
-        end
 
-        def terminate(reason, state) do
-          Logger.error("WS Handler terminated: #{inspect(reason)} ")
-          :ok
+          def terminate(reason, state) do
+            Logger.info("WS Handler terminated: #{inspect(reason)} ")
+            :ok
+          end
         end
       end
 
-      get unquote(path) do
+    Code.compile_quoted(handler_ast)
+
+    quote location: :keep do
+      get(unquote(path), fn conn ->
         var!(conn)
-        |> WebSockAdapter.upgrade(WS.Handler, [], timeout: 60_000)
+        |> WebSockAdapter.upgrade(unquote(module_name), [], timeout: 60_000)
         |> halt()
-      end
+      end)
     end
   end
 
