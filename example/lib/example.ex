@@ -1,7 +1,11 @@
 defmodule Example do
   import Plug.BasicAuth
 
-  use Francis, plugs: [{:basic_auth, username: "test", password: "test"}]
+  use Francis,
+    plugs: [
+      Plug.Logger,
+      {:basic_auth, username: "test", password: "test"}
+    ]
 
   get("/", fn _ ->
     """
