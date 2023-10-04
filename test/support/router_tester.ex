@@ -1,11 +1,11 @@
 defmodule Support.RouteTester do
-  def generate_module(handlers) do
+  def generate_module(handlers, plugs \\ []) do
     mod = "Elixir.TestMod#{random_string()}" |> String.to_atom()
 
     ast =
       quote do
         defmodule unquote(mod) do
-          use Francis
+          use Francis, plugs: unquote(plugs)
           unquote(handlers)
         end
       end
