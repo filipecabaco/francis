@@ -1,4 +1,7 @@
 defmodule Support.WsTester do
+  @moduledoc """
+  Websocket client to test Francis websocket routes
+  """
   use WebSockex
 
   def start(url, parent_pid) do

@@ -1,4 +1,7 @@
 defmodule Support.PlugTester do
+  @moduledoc """
+  Plug to test Francis plug applying order
+  """
   import Plug.Conn
   def init(opts), do: opts
 

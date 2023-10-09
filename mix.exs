@@ -1,7 +1,7 @@
 defmodule Francis.MixProject do
   use Mix.Project
 
-  @version "0.1.0-pre"
+  @version "0.1.0"
 
   def project do
     [
@@ -49,7 +49,8 @@ defmodule Francis.MixProject do
       {:websock_adapter, "~> 0.5.4"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:req, "~> 0.4.0", only: [:test]},
-      {:websockex, "~> 0.4.3", only: [:test]}
+      {:websockex, "~> 0.4.3", only: [:test]},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
     ]
   end
 
