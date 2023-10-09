@@ -13,7 +13,7 @@ by adding `francis` to your list of dependencies in `mix.exs`:
 
 def deps do
   [
-    {:francis, "~> 0.1.0-pre"}
+    {:francis, "~> 0.1.0"}
   ]
 end
 ```

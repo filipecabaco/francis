@@ -1,4 +1,7 @@
 defmodule Francis.Plug.Router do
+  alias Plug.Conn.WrapperError
+  alias Plug.Router.Utils
+
   defmacro __using__(opts) do
     quote location: :keep do
       import Francis
@@ -11,7 +14,7 @@ defmodule Francis.Plug.Router do
 
       @doc false
       def match(conn, _opts) do
-        do_match(conn, conn.method, Plug.Router.Utils.decode_path_info!(conn), conn.host)
+        do_match(conn, conn.method, Utils.decode_path_info!(conn), conn.host)
       end
 
       @doc false
@@ -28,8 +31,7 @@ defmodule Francis.Plug.Router do
             end
           )
         catch
-          kind, reason ->
-            Plug.Conn.WrapperError.reraise(conn, kind, reason, __STACKTRACE__)
+          kind, reason -> WrapperError.reraise(conn, kind, reason, __STACKTRACE__)
         end
       end
     end

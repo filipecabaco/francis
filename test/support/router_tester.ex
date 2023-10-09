@@ -1,4 +1,7 @@
 defmodule Support.RouteTester do
+  @moduledoc """
+  Generates test modules with Francis to test routes in isolation
+  """
   def generate_module(handlers, plugs \\ []) do
     mod = "Elixir.TestMod#{random_string()}" |> String.to_atom()
 
@@ -14,7 +17,7 @@ defmodule Support.RouteTester do
     mod
   end
 
-  defp random_string() do
+  defp random_string do
     10
     |> :crypto.strong_rand_bytes()
     |> Base.encode16(case: :upper)

@@ -1,4 +1,7 @@
 defmodule Francis do
+  @moduledoc """
+  Wrapper around Plug and Bandit to create APIs
+  """
   import Plug.Conn
 
   defmacro __using__(opts \\ []) do
@@ -37,7 +40,7 @@ defmodule Francis do
 
       plug(:match)
 
-      Enum.map(Keyword.get(unquote(opts), :plugs, []), fn
+      Enum.each(Keyword.get(unquote(opts), :plugs, []), fn
         plug when is_atom(plug) -> plug(plug)
         {plug, opts} when is_atom(plug) -> plug(plug, opts)
       end)
@@ -82,8 +85,7 @@ defmodule Francis do
       |> URI.parse()
       |> then(& &1.path)
       |> then(&String.split(&1, "/"))
-      |> Enum.map(&String.capitalize/1)
-      |> Enum.join(".")
+      |> Enum.map_join(".", &String.capitalize/1)
       |> then(&"#{__MODULE__}.#{&1}")
       |> String.to_atom()
 
