@@ -1,4 +1,7 @@
 defmodule Francis.Plug.Router do
+  @moduledoc """
+  Module that imports required macros from Francis and Plug.Router
+  """
   alias Plug.Conn.WrapperError
   alias Plug.Router.Utils
 

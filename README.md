@@ -1,7 +1,5 @@
 # Francis
 
-> Nothing is stable! Try it out with caution
-
 Simple boilerplate killer using Plug and Bandit inspired by [Sinatra](https://sinatrarb.com) for Ruby
 
 ## Installation
@@ -17,8 +15,11 @@ def deps do
   ]
 end
 ```
+## Usage
 
-## Example
+To start the server up you can run `mix francis.server` or if you need a iex console you can run with `iex -S mix francis.server`
+
+## Example of a router
 
 ```elixir
 defmodule Example do
@@ -32,12 +33,14 @@ defmodule Example do
   unmatched(fn _ -> "not found" end)
 end
 ```
-## Example with Plugs
+## Example of a router with Plugs
 
 With the `plugs` option you are able to apply a list of plugs that happen between before dispatching the request.
 
+
+In the following example we're adding the `Plug.BasicAuth` plug to setup basic authentication on all routes
+
 ```elixir
-# Example with Basic authentication enabled
 defmodule Example do
   import Plug.BasicAuth
 
@@ -51,31 +54,30 @@ defmodule Example do
   unmatched(fn _ -> "not found" end)
 end
 ```
+
 ## Example using it with Mix.install
 
+In your `iex` instance run:
 ```elixir
-  # create a new file called server.ex
-  Mix.install([:francis])
+Mix.install([{:francis, "~> 0.1"}])
 
-  defmodule Example do
-    use Francis
+defmodule Example do
+  use Francis
 
-    get("/", fn _ -> "<html>world</html>" end)
-    get("/:name", fn %{params: %{"name" => name}} -> "hello #{name}" end)
+  get("/", fn _ -> "<html>world</html>" end)
+  get("/:name", fn %{params: %{"name" => name}} -> "hello #{name}" end)
 
-    ws("ws", fn "ping" -> "pong" end)
+  ws("ws", fn "ping" -> "pong" end)
 
-    unmatched(fn _ -> "not found" end)
+  unmatched(fn _ -> "not found" end)
 
-    def start(_, _) do
-      children = [{Bandit, [plug: __MODULE__]}]
-      Supervisor.start_link(children, strategy: :one_for_one)
-    end
+  def start(_, _) do
+    children = [{Bandit, [plug: __MODULE__]}]
+    Supervisor.start_link(children, strategy: :one_for_one)
   end
+end
 
-  Example.start(nil, nil)
-  Process.sleep(:infinity)
-  # run this file with elixir server.ex
+Example.start()
 ```
 
 Check the folder [example](https://github.com/filipecabaco/francis/tree/main/example) to check the code.
