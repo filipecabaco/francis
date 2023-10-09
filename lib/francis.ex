@@ -25,7 +25,7 @@ defmodule Francis do
             |> send_resp(status, res)
             |> halt()
 
-          res when is_map(res) ->
+          res when is_map(res) or is_list(res) ->
             conn
             |> put_resp_content_type("application/json")
             |> send_resp(status, Jason.encode!(res))
