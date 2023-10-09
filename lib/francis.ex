@@ -1,12 +1,23 @@
 defmodule Francis do
   @moduledoc """
-  Wrapper around Plug and Bandit to create APIs
+  Module responsible for starting the Francis server and to wrap the Plug functionality
+
+  This module performs multiple tasks:
+    * Uses the Application module to start the Francis server
+    * Defines the Francis.Router which uses Francis.Plug.Router, :match and :dispatch
+    * Defines the macros get, post, put, delete, patch and ws to define routes for each operation
+
+  You can also set the following options:
+    * :bandit_opts - Options to be passed to Bandit
+    * :plugs - List of plugs to be used by Francis
   """
   import Plug.Conn
 
   defmacro __using__(opts \\ []) do
     quote location: :keep do
       use Application
+
+      def start(), do: start(nil, nil)
 
       def start(_type, _args) do
         children = [
@@ -49,11 +60,42 @@ defmodule Francis do
     end
   end
 
+  @doc """
+  Defines a GET route
+
+  ## Examples
+
+  ```
+  defmodule Example.Router do
+    use Francis
+
+    get "/hello", fn conn ->
+      "Hello World!"
+    end
+  end
+  ```
+  """
   defmacro get(path, handler) do
     quote location: :keep do
       Plug.Router.get(unquote(path), do: handle_resp(unquote(handler), var!(conn)))
     end
   end
+
+  @doc """
+  Defines a POST route
+
+  ## Examples
+
+  ```
+  defmodule Example.Router do
+    use Francis
+
+    post "/hello", fn conn ->
+      "Hello World!"
+    end
+  end
+  ```
+  """
 
   defmacro post(path, handler) do
     quote location: :keep do
@@ -61,11 +103,43 @@ defmodule Francis do
     end
   end
 
+  @doc """
+  Defines a PUT route
+
+  ## Examples
+
+  ```
+  defmodule Example.Router do
+    use Francis
+
+    put "/hello", fn conn ->
+      "Hello World!"
+    end
+  end
+  ```
+  """
+
   defmacro put(path, handler) do
     quote location: :keep do
       Plug.Router.put(unquote(path), do: handle_resp(unquote(handler), var!(conn)))
     end
   end
+
+  @doc """
+  Defines a DELETE route
+
+  ## Examples
+
+  ```
+  defmodule Example.Router do
+    use Francis
+
+    delete "/hello", fn conn ->
+      "Hello World!"
+    end
+  end
+  ```
+  """
 
   defmacro delete(path, handler) do
     quote location: :keep do
@@ -73,11 +147,43 @@ defmodule Francis do
     end
   end
 
+  @doc """
+  Defines a PATCH route
+
+  ## Examples
+
+  ```elixir
+  defmodule Example.Router do
+    use Francis
+
+    patch "/hello", fn conn ->
+      "Hello World!"
+    end
+  end
+  ```
+  """
+
   defmacro patch(path, handler) do
     quote location: :keep do
       Plug.Router.patch(unquote(path), do: handle_resp(unquote(handler), var!(conn)))
     end
   end
+
+  @doc """
+  Defines a WebSocket route that sends text type responses
+
+  ## Examples
+
+  ```elixir
+  defmodule Example.Router do
+    use Francis
+
+    ws "/hello", fn _ ->
+      "Hello World!"
+    end
+  end
+  ```
+  """
 
   defmacro ws(path, handler) do
     module_name =
@@ -129,6 +235,9 @@ defmodule Francis do
     end
   end
 
+  @doc """
+  Defines an action for umatched routes and returns 404
+  """
   defmacro unmatched(handler) do
     quote location: :keep do
       match _ do
