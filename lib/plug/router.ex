@@ -8,6 +8,7 @@ defmodule Francis.Plug.Router do
   defmacro __using__(opts) do
     quote location: :keep do
       import Francis
+      require Logger
 
       @plug_router_to %{}
       @before_compile Plug.Router
@@ -18,6 +19,10 @@ defmodule Francis.Plug.Router do
       @doc false
       def match(conn, _opts) do
         do_match(conn, conn.method, Utils.decode_path_info!(conn), conn.host)
+      rescue
+        err ->
+          Logger.error("Failed to match route: #{conn.method} #{conn.request_path}")
+          conn |> send_resp(404, "Not Found") |> halt()
       end
 
       @doc false

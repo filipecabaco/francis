@@ -1,7 +1,8 @@
 defmodule FrancisTest do
   use ExUnit.Case
-  doctest Francis
-  require Francis
+
+  import ExUnit.CaptureLog
+
   alias Francis
 
   describe "get/1" do
@@ -100,6 +101,15 @@ defmodule FrancisTest do
 
       mod = Support.RouteTester.generate_module(handler, [plug1, plug2])
       assert Req.get!("/", plug: mod).body == ["plug1", "plug2"]
+    end
+  end
+
+  describe "non matching routes without unmatched handler" do
+    test "returns an log error with the method and path of the failed route" do
+      mod = Support.RouteTester.generate_module(quote do: get("/", fn _ -> "test" end))
+
+      assert capture_log(fn -> Req.get!("/not_here", plug: mod) end) =~
+               "Failed to match route: GET /not_here"
     end
   end
 end
