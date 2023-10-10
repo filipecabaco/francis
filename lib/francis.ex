@@ -17,7 +17,7 @@ defmodule Francis do
     quote location: :keep do
       use Application
 
-      def start(), do: start(nil, nil)
+      def start, do: start(nil, nil)
 
       def start(_type, _args) do
         children = [
