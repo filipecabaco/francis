@@ -24,3 +24,6 @@ frank-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+/priv/plts/*.plt
+/priv/plts/*.plt.hash

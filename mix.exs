@@ -15,7 +15,13 @@ defmodule Francis.MixProject do
       docs: docs(),
       source_url: "https://github.com/filipecabaco/francis",
       elixirc_paths: elixirc_paths(Mix.env()),
-      description: "A simple wrapper around Plug and Bandit to reduce boilerplate for simple APIs"
+      description:
+        "A simple wrapper around Plug and Bandit to reduce boilerplate for simple APIs",
+      dialyzer: [
+        # Put the project-level PLT in the priv/ directory (instead of the default _build/ location)
+        plt_file: {:no_warn, "priv/plts/project.plt"},
+        plt_add_apps: [:mix, :iex]
+      ]
     ]
   end
 
@@ -51,7 +57,9 @@ defmodule Francis.MixProject do
       {:req, "~> 0.4.0", only: [:test]},
       {:websockex, "~> 0.4.3", only: [:test]},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false}
+      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false}
     ]
   end
 

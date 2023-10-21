@@ -1,10 +1,4 @@
 defmodule Mix.Tasks.Francis.Server do
-  use Mix.Task
-
-  alias Mix.Tasks.Run
-
-  @shortdoc "Starts Francis server"
-
   @moduledoc """
   Starts the application by configuring all endpoints servers to run.
 
@@ -17,6 +11,11 @@ defmodule Mix.Tasks.Francis.Server do
 
   The `--no-halt` flag is automatically added.
   """
+  use Mix.Task
+
+  alias Mix.Tasks.Run
+
+  @shortdoc "Starts Francis server"
 
   @impl true
   def run(args), do: Run.run(args ++ run_args())
