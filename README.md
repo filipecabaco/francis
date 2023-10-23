@@ -1,5 +1,9 @@
 # Francis
 
+[![Hex version badge](https://img.shields.io/hexpm/v/francis.svg)](https://hex.pm/packages/francis)
+[![License badge](https://img.shields.io/hexpm/l/repo_example.svg)](https://github.com/filipecabaco/francis/blob/master/LICENSE.md)
+[![Elixir CI](https://github.com/filipecabaco/francis/actions/workflows/elixir.yaml/badge.svg)](https://github.com/filipecabaco/francis/actions/workflows/elixir.yaml)
+
 Simple boilerplate killer using Plug and Bandit inspired by
 [Sinatra](https://sinatrarb.com) for Ruby
 
