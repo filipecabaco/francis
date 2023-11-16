@@ -29,7 +29,7 @@ defmodule Francis do
 
       defoverridable(start: 2)
 
-      defp handle_resp(handler, conn, status \\ 200) do
+      defp handle_response(handler, conn, status \\ 200) do
         case handler.(conn) do
           res when is_struct(res, Plug.Conn) ->
             res
@@ -77,7 +77,7 @@ defmodule Francis do
   """
   defmacro get(path, handler) do
     quote location: :keep do
-      Plug.Router.get(unquote(path), do: handle_resp(unquote(handler), var!(conn)))
+      Plug.Router.get(unquote(path), do: handle_response(unquote(handler), var!(conn)))
     end
   end
 
@@ -99,7 +99,7 @@ defmodule Francis do
 
   defmacro post(path, handler) do
     quote location: :keep do
-      Plug.Router.post(unquote(path), do: handle_resp(unquote(handler), var!(conn)))
+      Plug.Router.post(unquote(path), do: handle_response(unquote(handler), var!(conn)))
     end
   end
 
@@ -121,7 +121,7 @@ defmodule Francis do
 
   defmacro put(path, handler) do
     quote location: :keep do
-      Plug.Router.put(unquote(path), do: handle_resp(unquote(handler), var!(conn)))
+      Plug.Router.put(unquote(path), do: handle_response(unquote(handler), var!(conn)))
     end
   end
 
@@ -143,7 +143,7 @@ defmodule Francis do
 
   defmacro delete(path, handler) do
     quote location: :keep do
-      Plug.Router.delete(unquote(path), do: handle_resp(unquote(handler), var!(conn)))
+      Plug.Router.delete(unquote(path), do: handle_response(unquote(handler), var!(conn)))
     end
   end
 
@@ -165,7 +165,7 @@ defmodule Francis do
 
   defmacro patch(path, handler) do
     quote location: :keep do
-      Plug.Router.patch(unquote(path), do: handle_resp(unquote(handler), var!(conn)))
+      Plug.Router.patch(unquote(path), do: handle_response(unquote(handler), var!(conn)))
     end
   end
 
@@ -241,7 +241,7 @@ defmodule Francis do
   defmacro unmatched(handler) do
     quote location: :keep do
       match _ do
-        handle_resp(unquote(handler), var!(conn), 404)
+        handle_response(unquote(handler), var!(conn), 404)
       end
     end
   end
