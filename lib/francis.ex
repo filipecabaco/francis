@@ -20,9 +20,13 @@ defmodule Francis do
       def start, do: start(nil, nil)
 
       def start(_type, _args) do
-        children = [
-          {Bandit, [plug: __MODULE__] ++ Keyword.get(unquote(opts), :bandit_opts, [])}
-        ]
+        watcher_spec =
+          if Application.get_env(:francis, :watcher, false), do: [{Francis.Watcher, []}], else: []
+
+        children =
+          [
+            {Bandit, [plug: __MODULE__] ++ Keyword.get(unquote(opts), :bandit_opts, [])}
+          ] ++ watcher_spec
 
         Supervisor.start_link(children, strategy: :one_for_one)
       end
@@ -96,7 +100,6 @@ defmodule Francis do
   end
   ```
   """
-
   defmacro post(path, handler) do
     quote location: :keep do
       Plug.Router.post(unquote(path), do: handle_response(unquote(handler), var!(conn)))
@@ -118,7 +121,6 @@ defmodule Francis do
   end
   ```
   """
-
   defmacro put(path, handler) do
     quote location: :keep do
       Plug.Router.put(unquote(path), do: handle_response(unquote(handler), var!(conn)))
@@ -140,7 +142,6 @@ defmodule Francis do
   end
   ```
   """
-
   defmacro delete(path, handler) do
     quote location: :keep do
       Plug.Router.delete(unquote(path), do: handle_response(unquote(handler), var!(conn)))
@@ -162,7 +163,6 @@ defmodule Francis do
   end
   ```
   """
-
   defmacro patch(path, handler) do
     quote location: :keep do
       Plug.Router.patch(unquote(path), do: handle_response(unquote(handler), var!(conn)))
@@ -184,7 +184,6 @@ defmodule Francis do
   end
   ```
   """
-
   defmacro ws(path, handler) do
     module_name =
       path
