@@ -25,6 +25,18 @@ end
 To start the server up you can run `mix francis.server` or if you need a iex
 console you can run with `iex -S mix francis.server`
 
+## Watcher
+
+If you want to have a watcher that will reload the server when you change your code:
+
+```elixir
+import Config
+
+config :francis, watcher: true
+```
+
+It defaults to `false`
+
 ## Example of a router
 
 ```elixir
