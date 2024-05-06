@@ -33,7 +33,12 @@ defmodule Francis do
 
       defoverridable(start: 2)
 
-      defp handle_response(handler, conn, status \\ 200) do
+      @spec handle_response(
+              (Plug.Conn.t() -> binary() | map() | Plug.Conn.t()),
+              Plug.Conn.t(),
+              integer()
+            ) :: Plug.Conn.t()
+      def handle_response(handler, conn, status \\ 200) do
         case handler.(conn) do
           res when is_struct(res, Plug.Conn) ->
             res
@@ -79,6 +84,7 @@ defmodule Francis do
   end
   ```
   """
+  @spec get(String.t(), (Plug.Conn.t() -> binary() | map() | Plug.Conn.t())) :: Macro.t()
   defmacro get(path, handler) do
     quote location: :keep do
       Plug.Router.get(unquote(path), do: handle_response(unquote(handler), var!(conn)))
@@ -100,6 +106,7 @@ defmodule Francis do
   end
   ```
   """
+  @spec post(String.t(), (Plug.Conn.t() -> binary() | map() | Plug.Conn.t())) :: Macro.t()
   defmacro post(path, handler) do
     quote location: :keep do
       Plug.Router.post(unquote(path), do: handle_response(unquote(handler), var!(conn)))
@@ -121,6 +128,7 @@ defmodule Francis do
   end
   ```
   """
+  @spec put(String.t(), (Plug.Conn.t() -> binary() | map() | Plug.Conn.t())) :: Macro.t()
   defmacro put(path, handler) do
     quote location: :keep do
       Plug.Router.put(unquote(path), do: handle_response(unquote(handler), var!(conn)))
@@ -142,6 +150,7 @@ defmodule Francis do
   end
   ```
   """
+  @spec delete(String.t(), (Plug.Conn.t() -> binary() | map() | Plug.Conn.t())) :: Macro.t()
   defmacro delete(path, handler) do
     quote location: :keep do
       Plug.Router.delete(unquote(path), do: handle_response(unquote(handler), var!(conn)))
@@ -163,6 +172,7 @@ defmodule Francis do
   end
   ```
   """
+  @spec patch(String.t(), (Plug.Conn.t() -> binary() | map() | Plug.Conn.t())) :: Macro.t()
   defmacro patch(path, handler) do
     quote location: :keep do
       Plug.Router.patch(unquote(path), do: handle_response(unquote(handler), var!(conn)))
@@ -184,6 +194,7 @@ defmodule Francis do
   end
   ```
   """
+  @spec ws(String.t(), (binary() -> binary() | map())) :: Macro.t()
   defmacro ws(path, handler) do
     module_name =
       path
@@ -237,6 +248,7 @@ defmodule Francis do
   @doc """
   Defines an action for umatched routes and returns 404
   """
+  @spec unmatched((Plug.Conn.t() -> binary() | map() | Plug.Conn.t())) :: Macro.t()
   defmacro unmatched(handler) do
     quote location: :keep do
       match _ do
