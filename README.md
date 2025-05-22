@@ -66,6 +66,16 @@ def application do
 
 This will ensure that Mix knows what module should be the entrypoint.
 
+## Example of a router with Static serving
+
+With the `static` option, you are able to setup the options for `Plug.Static` to serve static assets easily.
+
+```elixir
+defmodule Example do
+  use Francis, static: [from: "pric/static", to: "/"]
+end
+```
+
 ## Example of a router with Plugs
 
 With the `plugs` option you are able to apply a list of plugs that happen
