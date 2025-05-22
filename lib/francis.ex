@@ -10,6 +10,7 @@ defmodule Francis do
   You can also set the following options:
     * :bandit_opts - Options to be passed to Bandit
     * :plugs - List of plugs to be used by Francis
+    * :static - Configure Plug.Static to serve static files
   """
   import Plug.Conn
 
@@ -57,6 +58,8 @@ defmodule Francis do
       end
 
       use Francis.Plug.Router
+      static = Keyword.get(unquote(opts), :static)
+      if static, do: plug(Plug.Static, static)
 
       plug(:match)
 

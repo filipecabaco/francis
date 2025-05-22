@@ -99,7 +99,7 @@ defmodule FrancisTest do
       plug1 = {Support.PlugTester, to_assign: "plug1"}
       plug2 = {Support.PlugTester, to_assign: "plug2"}
 
-      mod = Support.RouteTester.generate_module(handler, [plug1, plug2])
+      mod = Support.RouteTester.generate_module(handler, plugs: [plug1, plug2])
       assert Req.get!("/", plug: mod).body == ["plug1", "plug2"]
     end
   end
@@ -110,6 +110,30 @@ defmodule FrancisTest do
 
       assert capture_log(fn -> Req.get!("/not_here", plug: mod) end) =~
                "Failed to match route: GET /not_here"
+    end
+  end
+
+  describe "static configuration" do
+    test "returns a static file" do
+      handler = quote do: unmatched(fn _ -> "" end)
+
+      mod =
+        Support.RouteTester.generate_module(handler,
+          static: [at: "/", from: "test/support/priv/static/"]
+        )
+
+      assert Req.get!("/app.css", plug: mod).status == 200
+    end
+
+    test "returns a 404 for non-existing static file" do
+      handler = quote do: unmatched(fn _ -> "" end)
+
+      mod =
+        Support.RouteTester.generate_module(handler,
+          static: [at: "/", from: "test/support/static"]
+        )
+
+      assert Req.get!("/not_found.txt", plug: mod).status == 404
     end
   end
 end
