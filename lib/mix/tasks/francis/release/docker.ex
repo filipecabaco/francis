@@ -58,6 +58,7 @@ defmodule Mix.Tasks.Francis.Release.Docker do
 
     # Copy the release from the build stage
     COPY --from=build /app/_build/prod/rel/#{app} ./
+    COPY --from=build /app/priv ./priv
 
     # Set environment variables
     ENV HOME=/app

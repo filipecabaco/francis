@@ -36,6 +36,7 @@ WORKDIR /app
 
 # Copy the release from the build stage
 COPY --from=build /app/_build/prod/rel/example ./
+COPY --from=build /app/priv ./priv
 
 # Set environment variables
 ENV HOME=/app
