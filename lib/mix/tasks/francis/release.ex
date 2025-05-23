@@ -1,11 +1,10 @@
 defmodule Mix.Tasks.Francis.Release do
   @moduledoc """
-  Generates files for Francis deployment in multiple environments.
+  Generates docker files for Francis deployment
 
   ## Command line options
 
-  * `docker` - Generates Docker and .dockerignore for deployment
-    * `port` - Port to be exposed in Docker container (port=4001) . Defaults to 4000
+  * `port` - Port to be exposed in Docker container (port=4000) . Defaults to 4000
   """
   use Mix.Task
   alias Mix.Tasks.Francis.Release.Docker
@@ -16,11 +15,7 @@ defmodule Mix.Tasks.Francis.Release do
 
   @impl true
   def run(args) do
-    case args do
-      ["docker" | args] -> args |> args_to_keyword |> Docker.generate_files()
-      [] -> Mix.raise("No option given")
-      _ -> Mix.raise("Unknown option: #{inspect(args)}")
-    end
+    args |> args_to_keyword |> Docker.generate_files()
   end
 
   defp args_to_keyword(args) do
