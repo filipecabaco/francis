@@ -7,7 +7,8 @@ defmodule Example.MixProject do
       version: "0.1.0",
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      elixirc_paths: ["lib"],
     ]
   end
 
@@ -19,7 +20,8 @@ defmodule Example.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:francis, path: "../"},
+      # {:francis, path: "../"},
+      {:francis, "~> 0.1.8"},
       {:floki, "~> 0.34.0", only: [:test]},
       {:req, "~> 0.4.0", only: [:test]}
     ]
