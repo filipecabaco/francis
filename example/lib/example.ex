@@ -1,20 +1,18 @@
 defmodule Example do
   use Francis,
-    plugs: [  Plug.Logger ],
-    static: [ at: "/static", from: "priv/static" ]
+    static: [at: "/static", from: "priv/static"]
 
-  get("/", fn _ ->
-    """
-    <html>
-     <body>
-       <h1>Hello, world!</h1>
-     </body>
-    </html>
-    """
-  end)
+  ws(
+    "/ws",
+    fn msg, conn ->
+      Process.send_after(conn.transport, "sending back", 1000)
+      "received: #{msg}"
+    end,
+    timeout: 1000
+  )
 
-  get("/name/:name", fn %{params: %{"name" => name}} -> "hello #{name}" end)
-  get("/api/user", fn _ -> %{user: %{name: "Filipe Cabaço", github: "filipecabaco"}} end)
-  ws("ws", fn "ping" -> "pong" end)
+  get("/:name", fn %{params: %{"name" => name}} -> "hello #{name}" end)
+  post("/", fn conn -> conn.body_params end)
+
   unmatched(fn _ -> "not found" end)
 end

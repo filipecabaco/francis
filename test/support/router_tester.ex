@@ -6,13 +6,15 @@ defmodule Support.RouteTester do
     mod = "Elixir.TestMod#{random_string()}" |> String.to_atom()
     plugs = Keyword.get(opts, :plugs, [])
     static = Keyword.get(opts, :static)
+    parser = Keyword.get(opts, :parser)
 
     ast =
       quote do
         defmodule unquote(mod) do
           use Francis,
             plugs: unquote(plugs),
-            static: unquote(static)
+            static: unquote(static),
+            parser: unquote(parser)
 
           unquote(handlers)
         end

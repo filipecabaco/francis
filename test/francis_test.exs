@@ -56,19 +56,25 @@ defmodule FrancisTest do
 
       handler =
         quote do:
-                ws("ws", fn "test" ->
-                  send(unquote(parent_pid), {:handler, "received"})
+                ws("ws", fn "test", socket ->
+                  send(unquote(parent_pid), {:handler, "handler_received"})
+                  send(socket.transport, "late_sent")
                   "reply"
                 end)
 
       mod = Support.RouteTester.generate_module(handler)
 
       {:ok, francis_pid} = mod.start([], [])
-      {:ok, tester_pid} = Support.WsTester.start("ws://localhost:4000/ws", parent_pid)
-      WebSockex.send_frame(tester_pid, {:binary, "test"})
 
+      tester_pid =
+        start_supervised!(
+          {Support.WsTester, %{url: "ws://localhost:4000/ws", parent_pid: parent_pid}}
+        )
+
+      WebSockex.send_frame(tester_pid, {:text, "test"})
+      assert_receive {:handler, "handler_received"}, 5000
       assert_receive {:client, "reply"}, 5000
-      assert_receive {:handler, "received"}, 5000
+      assert_receive {:client, "late_sent"}, 5000
 
       on_exit(fn ->
         Process.exit(francis_pid, :normal)
