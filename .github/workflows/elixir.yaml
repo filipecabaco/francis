@@ -111,7 +111,7 @@ jobs:
 
       # Step: Run Credo in Strict mode
       - name: Run Sobelow
-        run: mix sobelow --exit --ignore-files lib/watcher.ex
+        run: mix sobelow --skip --exit
 
       # Step: Run deps audit
       - name: Run Deps Audit

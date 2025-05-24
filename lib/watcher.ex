@@ -16,6 +16,7 @@ defmodule Francis.Watcher do
     {:ok, state}
   end
 
+  # sobelow_skip ["RCE.CodeModule"]
   def handle_info(:check, %{files: files} = state) do
     files =
       Enum.reduce(Path.wildcard("./**/*.{ex,exs}"), files, fn path, files ->

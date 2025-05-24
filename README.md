@@ -4,8 +4,9 @@
 [![License badge](https://img.shields.io/hexpm/l/repo_example.svg)](https://github.com/filipecabaco/francis/blob/master/LICENSE.md)
 [![Elixir CI](https://github.com/filipecabaco/francis/actions/workflows/elixir.yaml/badge.svg)](https://github.com/filipecabaco/francis/actions/workflows/elixir.yaml)
 
-Simple boilerplate killer using Plug and Bandit inspired by
-[Sinatra](https://sinatrarb.com) for Ruby
+Simple boilerplate killer using Plug and Bandit inspired by [Sinatra](https://sinatrarb.com) for Ruby
+
+Focused on reducing time to build as it offers automatic request parsing, automatic response parsing, easy DSL to build quickly new endpoints and websocket listeners.
 
 ## Installation
 
@@ -22,8 +23,13 @@ end
 
 ## Usage
 
-To start the server up you can run `mix francis.server` or if you need a iex
-console you can run with `iex -S mix francis.server`
+To start the server up you can run `mix francis.server` or if you need a iex console you can run with `iex -S mix francis.server`
+
+To create the Dockerfile that can be used for deployment you can run:
+
+```bash
+mix francis.release
+```
 
 ## Watcher
 
@@ -45,6 +51,7 @@ defmodule Example do
 
   get("/", fn _ -> "<html>world</html>" end)
   get("/:name", fn %{params: %{"name" => name}} -> "hello #{name}" end)
+  post("/", fn conn -> conn.body_params end)
 
   ws("ws", fn "ping" -> "pong" end)
 
@@ -93,36 +100,10 @@ defmodule Example do
   get("/", fn _ -> "<html>world</html>" end)
   get("/:name", fn %{params: %{"name" => name}} -> "hello #{name}" end)
 
-  ws("ws", fn "ping" -> "pong" end)
+  ws("ws", fn "ping", _socket -> "pong" end)
 
   unmatched(fn _ -> "not found" end)
 end
-```
-
-## Example using it with Mix.install
-
-In your `iex` instance run:
-
-```elixir
-Mix.install([{:francis, "~> 0.1"}])
-
-defmodule Example do
-  use Francis
-
-  get("/", fn _ -> "<html>world</html>" end)
-  get("/:name", fn %{params: %{"name" => name}} -> "hello #{name}" end)
-
-  ws("ws", fn "ping" -> "pong" end)
-
-  unmatched(fn _ -> "not found" end)
-
-  def start(_, _) do
-    children = [{Bandit, [plug: __MODULE__]}]
-    Supervisor.start_link(children, strategy: :one_for_one)
-  end
-end
-
-Example.start()
 ```
 
 Check the folder

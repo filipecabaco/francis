@@ -6,11 +6,20 @@ defmodule Francis do
     * Uses the Application module to start the Francis server
     * Defines the Francis.Router which uses Francis.Plug.Router, :match and :dispatch
     * Defines the macros get, post, put, delete, patch and ws to define routes for each operation
+    * Setups Plug.Static with the given options
+    * Sets up Plug.Parsers with the default configuration of:
+      * ```elixir
+        plug(Plug.Parsers,
+          parsers: [:urlencoded, :multipart, :json],
+          json_decoder: Jason
+        )
+        ```
 
   You can also set the following options:
     * :bandit_opts - Options to be passed to Bandit
     * :plugs - List of plugs to be used by Francis
     * :static - Configure Plug.Static to serve static files
+    * :parser - Overrides the default configuration for Plug.Parsers
   """
   import Plug.Conn
 
@@ -60,8 +69,18 @@ defmodule Francis do
       use Francis.Plug.Router
       static = Keyword.get(unquote(opts), :static)
       if static, do: plug(Plug.Static, static)
+      parser = Keyword.get(unquote(opts), :parser)
 
       plug(:match)
+
+      if parser do
+        plug(Plug.Parsers, parser)
+      else
+        plug(Plug.Parsers,
+          parsers: [:urlencoded, :multipart, :json],
+          json_decoder: Jason
+        )
+      end
 
       Enum.each(Keyword.get(unquote(opts), :plugs, []), fn
         plug when is_atom(plug) -> plug(plug)
@@ -183,7 +202,13 @@ defmodule Francis do
   end
 
   @doc """
-  Defines a WebSocket route that sends text type responses
+  Defines a WebSocket route that sends text type responses.
+
+  The handler function receives the message and the socket state, and it can return a binary or a map.
+  The state includes:
+  - `:transport` - The transport process that can be used to send messages back to the client using `send/2`
+  - `:id` - A unique identifier for the WebSocket connection that can be used to track the connection
+  - `:path` - The path of the WebSocket connection to identify the route that triggered the connection
 
   ## Examples
 
@@ -191,60 +216,83 @@ defmodule Francis do
   defmodule Example.Router do
     use Francis
 
-    ws "/hello", fn _ ->
+    ws "/hello", fn _, socket ->
       "Hello World!"
     end
   end
   ```
   """
+
   @spec ws(String.t(), (binary() -> binary() | map())) :: Macro.t()
-  defmacro ws(path, handler) do
-    module_name =
-      path
-      |> URI.parse()
-      |> then(& &1.path)
-      |> then(&String.split(&1, "/"))
-      |> Enum.map_join(".", &String.capitalize/1)
-      |> then(&"#{__MODULE__}.#{&1}")
-      |> String.to_atom()
-
-    handler_ast =
-      quote do
-        defmodule unquote(module_name) do
-          require WebSockAdapter
-
-          require Logger
-          def init(_opts), do: {:ok, %{}}
-
-          def handle_in(message, state) do
-            case unquote(handler).(elem(message, 0)) do
-              res when is_binary(res) ->
-                {:push, [{:text, res}], state}
-
-              res when is_map(res) ->
-                {:push, [{:text, Jason.encode!(res)}], state}
-            end
-          rescue
-            e ->
-              Logger.error("WS Handler error: #{inspect(e)} ")
-              {:stop, :error, e}
-          end
-
-          def terminate(reason, state) do
-            Logger.info("WS Handler terminated: #{inspect(reason)} ")
-            :ok
-          end
-        end
-      end
+  defmacro ws(path, handler, opts \\ []) do
+    module_name = generate_ws_module_name(path)
+    handler_ast = build_ws_handler_ast(module_name, handler)
 
     Code.compile_quoted(handler_ast)
 
     quote location: :keep do
       get(unquote(path), fn conn ->
-        var!(conn)
-        |> WebSockAdapter.upgrade(unquote(module_name), [], timeout: 60_000)
+        conn
+        |> var!()
+        |> WebSockAdapter.upgrade(
+          unquote(module_name),
+          %{id: 32 |> :crypto.strong_rand_bytes() |> Base.encode16(), path: unquote(path)},
+          timeout: Keyword.get(unquote(opts), :timeout, 60_000)
+        )
         |> halt()
       end)
+    end
+  end
+
+  # Private helper functions for WebSocket macro
+  # sobelow_skip ["DOS.StringToAtom"]
+  defp generate_ws_module_name(path) do
+    path
+    |> URI.parse()
+    |> then(& &1.path)
+    |> then(&String.split(&1, "/"))
+    |> Enum.map_join(".", &String.capitalize/1)
+    |> then(&"#{__MODULE__}#{&1}")
+    |> String.to_atom()
+  end
+
+  defp build_ws_handler_ast(module_name, handler) do
+    quote do
+      defmodule unquote(module_name) do
+        require WebSockAdapter
+        require Logger
+
+        def init(opts) do
+          {:ok, Map.put(opts, :transport, self())}
+        end
+
+        def handle_in(message, state) do
+          message
+          |> elem(0)
+          |> then(&unquote(handler).(&1, state))
+          |> format_ws_response(state)
+        rescue
+          e ->
+            Logger.error("WS Handler error: #{inspect(e)} ")
+            {:stop, :error, e}
+        end
+
+        def handle_info(msg, state), do: format_ws_response(msg, state)
+
+        def terminate(reason, state) do
+          Logger.info("WS Handler terminated: #{inspect(reason)} ")
+          :ok
+        end
+
+        # Helper function to format WebSocket responses
+        defp format_ws_response({type, msg}, state), do: {:push, [{type, msg}], state}
+
+        defp format_ws_response(msg, state) when is_binary(msg),
+          do: {:push, [{:text, msg}], state}
+
+        defp format_ws_response(msg, state) when is_map(msg),
+          do: {:push, [{:text, Jason.encode!(msg)}], state}
+      end
     end
   end
 
