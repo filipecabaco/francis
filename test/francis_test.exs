@@ -48,6 +48,14 @@ defmodule FrancisTest do
 
       assert Req.patch!("/", plug: mod).body == "test"
     end
+
+    test "setups a HEAD handler" do
+      handler = quote do: get("/", fn _ -> "test" end)
+      mod = Support.RouteTester.generate_module(handler)
+
+      assert Req.head!("/", plug: mod).status == 200
+      assert Req.head!("/", plug: mod).body == ""
+    end
   end
 
   describe "ws/1" do
