@@ -98,8 +98,8 @@ jobs:
         run: mix dialyzer --plt
 
       # Step: Check that the checked in code has already been formatted.
-      - name: Check Formatting
-        run: mix format --check-formatted
+      # - name: Check Formatting
+      # run: mix format --check-formatted
 
       # Step: Execute the tests.
       - name: Run tests

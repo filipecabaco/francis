@@ -6,7 +6,7 @@ defmodule Example do
     "/ws",
     fn msg, conn ->
       Process.send_after(conn.transport, "sending back", 1000)
-      "received: #{msg}"
+      {:reply, "received: #{msg}"}
     end,
     timeout: 1000
   )
