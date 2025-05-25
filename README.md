@@ -4,14 +4,13 @@
 [![License badge](https://img.shields.io/hexpm/l/repo_example.svg)](https://github.com/filipecabaco/francis/blob/master/LICENSE.md)
 [![Elixir CI](https://github.com/filipecabaco/francis/actions/workflows/elixir.yaml/badge.svg)](https://github.com/filipecabaco/francis/actions/workflows/elixir.yaml)
 
-Simple boilerplate killer using Plug and Bandit inspired by [Sinatra](https://sinatrarb.com) for Ruby
+Simple boilerplate killer using Plug and Bandit inspired by [Sinatra](https://sinatrarb.com) for Ruby.
 
 Focused on reducing time to build as it offers automatic request parsing, automatic response parsing, easy DSL to build quickly new endpoints and websocket listeners.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `francis` to your list of dependencies in `mix.exs`:
+If [available in Hex](https://hex.pm/docs/publish), the package can be installed by adding `francis` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -23,7 +22,7 @@ end
 
 ## Usage
 
-To start the server up you can run `mix francis.server` or if you need a iex console you can run with `iex -S mix francis.server`
+To start the server up you can run `mix francis.server` or if you need a iex console you can run with `iex -S mix francis.server`.
 
 To create the Dockerfile that can be used for deployment you can run:
 
@@ -62,7 +61,7 @@ end
 And in your `mix.exs` file add that this module should be the one used for
 startup:
 
-```
+```elixir
 def application do
    [
      extra_applications: [:logger],
@@ -106,6 +105,4 @@ defmodule Example do
 end
 ```
 
-Check the folder
-[example](https://github.com/filipecabaco/francis/tree/main/example) to check
-the code.
+Check the folder [example](https://github.com/filipecabaco/francis/tree/main/example) to check the code.

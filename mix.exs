@@ -2,6 +2,7 @@ defmodule Francis.MixProject do
   use Mix.Project
 
   @version "0.1.11"
+  @scm_url "https://github.com/filipecabaco/francis"
 
   def project do
     [
@@ -13,7 +14,7 @@ defmodule Francis.MixProject do
       deps: deps(),
       package: package(),
       docs: docs(),
-      source_url: "https://github.com/filipecabaco/francis",
+      source_url: @scm_url,
       elixirc_paths: elixirc_paths(Mix.env()),
       description:
         "A simple wrapper around Plug and Bandit to reduce boilerplate for simple APIs",
@@ -34,15 +35,16 @@ defmodule Francis.MixProject do
       files: ["lib", "test", "mix.exs", "README*", "LICENSE*"],
       maintainers: ["Filipe Cabaço"],
       licenses: ["MIT"],
-      links: %{"GitHub" => "https://github.com/filipecabaco/francis"}
+      links: %{"GitHub" => @scm_url}
     ]
   end
 
   defp docs do
     [
-      main: "readme",
+      main: "Overview",
       extras: ["README.md"],
-      formatters: ["html", "epub"]
+      formatters: ["html", "epub"],
+      source_ref: "v#{@version}"
     ]
   end
 
