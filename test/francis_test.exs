@@ -1,5 +1,5 @@
 defmodule FrancisTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   import ExUnit.CaptureLog
 
@@ -53,33 +53,59 @@ defmodule FrancisTest do
   describe "ws/1" do
     test "returns a response with the given body" do
       parent_pid = self()
+      path = 10 |> :crypto.strong_rand_bytes() |> Base.encode16(case: :lower)
 
       handler =
         quote do:
-                ws("ws", fn "test", socket ->
+                ws(unquote(path), fn "test", socket ->
                   send(unquote(parent_pid), {:handler, "handler_received"})
                   send(socket.transport, "late_sent")
-                  "reply"
+                  send(socket.transport, %{key: "value"})
+                  send(socket.transport, [1, 2, 3])
+                  {:reply, "reply"}
                 end)
 
       mod = Support.RouteTester.generate_module(handler)
 
-      {:ok, francis_pid} = mod.start([], [])
+      {:ok, _} = start_supervised(mod)
 
       tester_pid =
         start_supervised!(
-          {Support.WsTester, %{url: "ws://localhost:4000/ws", parent_pid: parent_pid}}
+          {Support.WsTester, %{url: "ws://localhost:4000/#{path}", parent_pid: parent_pid}}
         )
 
       WebSockex.send_frame(tester_pid, {:text, "test"})
-      assert_receive {:handler, "handler_received"}, 5000
-      assert_receive {:client, "reply"}, 5000
-      assert_receive {:client, "late_sent"}, 5000
+      assert_receive {:handler, "handler_received"}
+      assert_receive {:client, "late_sent"}
+      assert_receive {:client, %{"key" => "value"}}
+      assert_receive {:client, [1, 2, 3]}
 
-      on_exit(fn ->
-        Process.exit(francis_pid, :normal)
-        Process.exit(tester_pid, :normal)
-      end)
+      :ok
+    end
+
+    test "does not return a response with the given body" do
+      parent_pid = self()
+      path = 10 |> :crypto.strong_rand_bytes() |> Base.encode16(case: :lower)
+
+      handler =
+        quote do:
+                ws(unquote(path), fn "test", socket ->
+                  send(unquote(parent_pid), {:handler, "handler_received"})
+                  :noreply
+                end)
+
+      mod = Support.RouteTester.generate_module(handler)
+
+      {:ok, _} = start_supervised(mod)
+
+      tester_pid =
+        start_supervised!(
+          {Support.WsTester, %{url: "ws://localhost:4000/#{path}", parent_pid: parent_pid}}
+        )
+
+      WebSockex.send_frame(tester_pid, {:text, "test"})
+      assert_receive {:handler, "handler_received"}
+      refute_receive :_, 500
 
       :ok
     end

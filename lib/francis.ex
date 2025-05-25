@@ -41,6 +41,17 @@ defmodule Francis do
         Supervisor.start_link(children, strategy: :one_for_one)
       end
 
+      def child_spec(opts) do
+        %{
+          id: __MODULE__,
+          start: {__MODULE__, :start, opts},
+          type: :supervisor,
+          restart: :permanent,
+          shutdown: 5000,
+          modules: [__MODULE__]
+        }
+      end
+
       defoverridable(start: 2)
 
       @spec handle_response(
@@ -223,7 +234,8 @@ defmodule Francis do
   ```
   """
 
-  @spec ws(String.t(), (binary() -> binary() | map())) :: Macro.t()
+  @spec ws(String.t(), (binary(), %{id: binary(), transport: pid(), path: binary()} ->
+                          {:reply, binary() | map() | {atom(), any()}} | :noreply)) :: Macro.t()
   defmacro ws(path, handler, opts \\ []) do
     module_name = generate_ws_module_name(path)
     handler_ast = build_ws_handler_ast(module_name, handler)
@@ -252,7 +264,7 @@ defmodule Francis do
     |> then(& &1.path)
     |> then(&String.split(&1, "/"))
     |> Enum.map_join(".", &String.capitalize/1)
-    |> then(&"#{__MODULE__}#{&1}")
+    |> then(&"#{__MODULE__}.#{&1}")
     |> String.to_atom()
   end
 
@@ -267,33 +279,55 @@ defmodule Francis do
         end
 
         def handle_in(message, state) do
-          message
-          |> elem(0)
-          |> then(&unquote(handler).(&1, state))
-          |> format_ws_response(state)
-        rescue
-          e ->
-            Logger.error("WS Handler error: #{inspect(e)} ")
-            {:stop, :error, e}
+          unquote(build_handle_in_ast(handler))
         end
 
-        def handle_info(msg, state), do: format_ws_response(msg, state)
+        def handle_info(msg, state) do
+          format_ws_response({:reply, msg}, state)
+        end
 
         def terminate(reason, state) do
           Logger.info("WS Handler terminated: #{inspect(reason)} ")
           :ok
         end
 
-        # Helper function to format WebSocket responses
-        defp format_ws_response({type, msg}, state), do: {:push, [{type, msg}], state}
-
-        defp format_ws_response(msg, state) when is_binary(msg),
-          do: {:push, [{:text, msg}], state}
-
-        defp format_ws_response(msg, state) when is_map(msg),
-          do: {:push, [{:text, Jason.encode!(msg)}], state}
+        unquote_splicing(build_format_response_ast())
       end
     end
+  end
+
+  defp build_handle_in_ast(handler) do
+    quote do
+      try do
+        message
+        |> elem(0)
+        |> then(&unquote(handler).(&1, state))
+        |> format_ws_response(state)
+      rescue
+        e ->
+          Logger.error("WS Handler error: #{inspect(e)} ")
+          {:stop, :error, e}
+      end
+    end
+  end
+
+  defp build_format_response_ast do
+    [
+      quote do
+        defp format_ws_response({:reply, {type, msg}}, state), do: {:push, [{type, msg}], state}
+      end,
+      quote do
+        defp format_ws_response({:reply, msg}, state) when is_binary(msg),
+          do: {:push, [{:text, msg}], state}
+      end,
+      quote do
+        defp format_ws_response({:reply, msg}, state) when is_map(msg) or is_list(msg),
+          do: {:push, [{:text, Jason.encode!(msg)}], state}
+      end,
+      quote do
+        defp format_ws_response(:noreply, state), do: {:ok, state}
+      end
+    ]
   end
 
   @doc """
