@@ -25,8 +25,8 @@ defmodule Support.RouteTester do
   end
 
   defp random_string do
-    10
-    |> :crypto.strong_rand_bytes()
+    System.unique_integer([:positive])
+    |> Integer.to_string(36)
     |> Base.encode16(case: :upper)
   end
 end

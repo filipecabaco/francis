@@ -67,7 +67,10 @@ defmodule FrancisTest do
 
       mod = Support.RouteTester.generate_module(handler)
 
-      {:ok, _} = start_supervised(mod)
+      assert capture_log(fn ->
+               {:ok, _} = start_supervised(mod)
+             end) =~
+               "Running #{mod |> Module.split() |> List.last()} with Bandit #{Application.spec(:bandit, :vsn)} at 0.0.0.0:4000"
 
       tester_pid =
         start_supervised!(
@@ -83,6 +86,7 @@ defmodule FrancisTest do
       :ok
     end
 
+    @tag :capture_log
     test "does not return a response with the given body" do
       parent_pid = self()
       path = 10 |> :crypto.strong_rand_bytes() |> Base.encode16(case: :lower)
