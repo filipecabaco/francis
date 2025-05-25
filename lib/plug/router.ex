@@ -14,7 +14,7 @@ defmodule Francis.Plug.Router do
       @before_compile Plug.Router
 
       use Plug.Builder, unquote(opts)
-      import Plug.Router, except: [get: 2, post: 2, put: 2, delete: 2, patch: 2]
+      import Plug.Router, except: [get: 2, post: 2, put: 2, delete: 2, patch: 2, head: 2]
 
       @doc false
       def match(conn, _opts) do

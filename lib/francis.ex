@@ -120,6 +120,7 @@ defmodule Francis do
   @spec get(String.t(), (Plug.Conn.t() -> binary() | map() | Plug.Conn.t())) :: Macro.t()
   defmacro get(path, handler) do
     quote location: :keep do
+      Plug.Router.head(unquote(path), do: handle_response(unquote(handler), var!(conn)))
       Plug.Router.get(unquote(path), do: handle_response(unquote(handler), var!(conn)))
     end
   end
