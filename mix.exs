@@ -41,7 +41,7 @@ defmodule Francis.MixProject do
 
   defp docs do
     [
-      main: "Overview",
+      main: "readme",
       extras: ["README.md"],
       formatters: ["html", "epub"],
       source_ref: "v#{@version}"
