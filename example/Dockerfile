@@ -9,7 +9,7 @@ FROM ${BUILDER_IMAGE} AS build
 ENV MIX_ENV=prod
 
 # Install build dependencies
-RUN apt-get update -y     && apt-get install curl -y     && apt-get install -y build-essential git     && apt-get clean
+RUN apt-get update -y && apt-get install curl -y && apt-get install -y build-essential git && apt-get clean
 # Set working directory
 WORKDIR /app
 
@@ -23,7 +23,6 @@ RUN mix release
 
 # Run Stage
 FROM ${RUNNER_IMAGE} AS run
-
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
@@ -31,6 +30,7 @@ ENV LC_ALL=en_US.UTF-8
 # Install runtime dependencies
 RUN apt-get update -y && apt-get install -y libstdc++6 openssl libncurses5 locales
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
+
 # Set working directory
 WORKDIR /app
 
@@ -46,3 +46,4 @@ EXPOSE 4000
 
 # Start the application
 CMD ["bin/example", "start"]
+

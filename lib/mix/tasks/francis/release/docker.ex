@@ -1,11 +1,11 @@
 defmodule Mix.Tasks.Francis.Release.Docker do
-  @moduledoc """
-  Generates Docker and .dockerignore for deployment
-  """
+  @moduledoc false
 
   @behaviour Mix.Tasks.Francis.Release
 
   @impl true
+  @doc "Generates Docker and .dockerignore for deployment."
+  @spec generate_files(keyword()) :: :ok
   def generate_files(args) do
     app = Mix.Project.config() |> Keyword.fetch!(:app)
     port = Keyword.get(args, :port, 4000)
@@ -14,8 +14,8 @@ defmodule Mix.Tasks.Francis.Release.Docker do
     docker_file = dockerfile_template(app, port, elixir_version, opt_version)
     docker_ignore = dockerignore_template()
 
-    File.write!("Dockerfile", docker_file)
-    File.write!(".dockerignore", docker_ignore)
+    Mix.Generator.create_file("Dockerfile", docker_file)
+    Mix.Generator.create_file(".dockerignore", docker_ignore)
   end
 
   defp dockerfile_template(app, port, elixir_version, otp_version) do

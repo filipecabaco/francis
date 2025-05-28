@@ -15,13 +15,13 @@ defmodule Mix.Tasks.Francis.Release do
 
   @impl true
   def run(args) do
-    args |> args_to_keyword |> Docker.generate_files()
+    args |> args_to_keyword() |> Docker.generate_files()
   end
 
   defp args_to_keyword(args) do
-    args
-    |> Enum.map(fn arg -> String.split(arg, "=") end)
-    |> Enum.map(fn [k, v] -> {String.to_existing_atom(k), v} end)
-    |> Keyword.new()
+    {opts, _positional, _invalid} =
+      OptionParser.parse(args, strict: [port: :integer], aliases: [p: :port])
+
+    opts
   end
 end
