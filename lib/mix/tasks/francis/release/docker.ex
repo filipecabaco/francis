@@ -8,10 +8,10 @@ defmodule Mix.Tasks.Francis.Release.Docker do
   @spec generate_files(keyword()) :: :ok
   def generate_files(args) do
     app = Mix.Project.config() |> Keyword.fetch!(:app)
-    port = Keyword.get(args, :port, 4000)
-    elixir_version = Keyword.get(args, :elixir_version, "1.18.4")
-    opt_version = Keyword.get(args, :elixir_version, "27.3.4")
-    docker_file = dockerfile_template(app, port, elixir_version, opt_version)
+    {port, args} = Keyword.pop(args, :port, 4000)
+    {elixir_version, args} = Keyword.pop(args, :elixir_version, "1.18.4")
+    {otp_version, []} = Keyword.pop(args, :otp_version, "27.3.4")
+    docker_file = dockerfile_template(app, port, elixir_version, otp_version)
     docker_ignore = dockerignore_template()
 
     Mix.Generator.create_file("Dockerfile", docker_file)
