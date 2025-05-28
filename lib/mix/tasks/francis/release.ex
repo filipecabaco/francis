@@ -1,6 +1,6 @@
 defmodule Mix.Tasks.Francis.Release do
   @moduledoc """
-  Mix task to generate Docker deployment files for Francis projects.
+  Generates Docker deployment files for Francis projects.
 
   This task creates a `Dockerfile` and `.dockerignore` in the current working directory,
   using the project name and configuration. It is intended to simplify containerization
