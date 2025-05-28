@@ -1,5 +1,3 @@
 import Config
 
-if config_env() == :dev do
-  config :francis, watcher: true
-end
+import_config "#{config_env()}.exs"
