@@ -1,12 +1,33 @@
 defmodule Mix.Tasks.Francis.Release do
   @moduledoc """
-  Generates docker files for Francis deployment
+  Mix task to generate Docker deployment files for Francis projects.
+
+  This task creates a `Dockerfile` and `.dockerignore` in the current working directory,
+  using the project name and configuration. It is intended to simplify containerization
+  and deployment of Francis-based applications.
+
+  ## Usage
+
+      mix francis.release [OPTIONS]
 
   ## Command line options
 
-  * `port` - Port to be exposed in Docker container (port=4000) . Defaults to 4000
+    * `-p`, `--port <port>` - Port to expose in the Docker container (default: 4000).
+    * `--elixir-version <version>` - Elixir version to use in the Docker image (default: 1.18.4).
+    * `--otp-version <version>` - Erlang/OTP version to use in the Docker image (default: 27.3.4).
+
+  Example:
+
+      mix francis.release --port 8080 --elixir-version 1.16.2 --otp-version 26.2.1
+
+  This will generate a Dockerfile exposing port 8080 and using the specified
+  Elixir and OTP versions. If you use some combination of versions that are not
+  compatible it will fail when building the docker image.
+
+  All files are generated in the current working directory. Unknown options are ignored.
   """
   use Mix.Task
+
   alias Mix.Tasks.Francis.Release.Docker
 
   @shortdoc "Generates files for Francis deployment"
@@ -15,13 +36,16 @@ defmodule Mix.Tasks.Francis.Release do
 
   @impl true
   def run(args) do
-    args |> args_to_keyword() |> Docker.generate_files()
-  end
-
-  defp args_to_keyword(args) do
     {opts, _positional, _invalid} =
-      OptionParser.parse(args, strict: [port: :integer], aliases: [p: :port])
+      OptionParser.parse(args,
+        strict: [port: :integer, elixir_version: :string, otp_version: :string],
+        aliases: [
+          p: :port,
+          elixir_version: :"elixir-version",
+          otp_version: :"otp-version"
+        ]
+      )
 
-    opts
+    Docker.generate_files(opts)
   end
 end

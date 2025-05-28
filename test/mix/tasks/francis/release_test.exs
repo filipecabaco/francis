@@ -25,9 +25,14 @@ defmodule Mix.Tasks.Francis.ReleaseTest do
   end
 
   test "generates Dockerfile and .dockerignore with default options" do
-    assert capture_io(fn ->
-             Release.run([])
-           end) =~ ""
+    output =
+      capture_io(fn ->
+        Release.run([])
+      end)
+      |> strip_ansi()
+
+    assert output =~ "* creating Dockerfile"
+    assert output =~ "* creating .dockerignore"
 
     assert File.exists?(@dockerfile)
     assert File.exists?(@dockerignore)
@@ -41,29 +46,66 @@ defmodule Mix.Tasks.Francis.ReleaseTest do
   end
 
   test "generates Dockerfile with custom port" do
-    assert capture_io(fn ->
-             Release.run(["--port", "1234"])
-           end) =~ ""
+    capture_io(fn ->
+      Release.run(["--port", "1234"])
+    end)
 
     dockerfile = File.read!(@dockerfile)
     assert dockerfile =~ "EXPOSE 1234"
   end
 
   test "generates Dockerfile with custom port using alias" do
-    assert capture_io(fn ->
-             Release.run(["-p", "5678"])
-           end) =~ ""
+    capture_io(fn ->
+      Release.run(["-p", "5678"])
+    end)
 
     dockerfile = File.read!(@dockerfile)
     assert dockerfile =~ "EXPOSE 5678"
   end
 
+  test "generates Dockerfile with custom elixir and otp versions" do
+    capture_io(fn ->
+      Release.run(["--elixir-version", "1.17.0", "--otp-version", "26.2.1"])
+    end)
+
+    dockerfile = File.read!(@dockerfile)
+    assert dockerfile =~ "ARG ELIXIR_VERSION=1.17.0"
+    assert dockerfile =~ "ARG OTP_VERSION=26.2.1"
+
+    assert dockerfile =~
+             "hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
+  end
+
+  test "generates Dockerfile with only custom elixir version" do
+    capture_io(fn ->
+      Release.run(["--elixir-version", "1.16.2"])
+    end)
+
+    dockerfile = File.read!(@dockerfile)
+    assert dockerfile =~ "ARG ELIXIR_VERSION=1.16.2"
+    assert dockerfile =~ "ARG OTP_VERSION=27.3.4"
+  end
+
+  test "generates Dockerfile with only custom otp version" do
+    capture_io(fn ->
+      Release.run(["--otp-version", "25.3.0"])
+    end)
+
+    dockerfile = File.read!(@dockerfile)
+    assert dockerfile =~ "ARG ELIXIR_VERSION=1.18.4"
+    assert dockerfile =~ "ARG OTP_VERSION=25.3.0"
+  end
+
   test "does not raise on unknown options and ignores them" do
-    assert capture_io(fn ->
-             Release.run(["--unknown", "foo"])
-           end) =~ ""
+    capture_io(fn ->
+      Release.run(["--unknown", "foo"])
+    end)
 
     assert File.exists?(@dockerfile)
     assert File.exists?(@dockerignore)
+  end
+
+  defp strip_ansi(str) do
+    Regex.replace(~r/\e\[[\d;]*m/, str, "")
   end
 end

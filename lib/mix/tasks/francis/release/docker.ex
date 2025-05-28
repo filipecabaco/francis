@@ -86,5 +86,7 @@ defmodule Mix.Tasks.Francis.Release.Docker do
 
     Mix.Generator.create_file("Dockerfile", docker_file)
     Mix.Generator.create_file(".dockerignore", docker_ignore)
+
+    :ok
   end
 end
