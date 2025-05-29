@@ -21,7 +21,7 @@ defmodule Example.MixProject do
   defp deps do
     [
       {:francis, path: "../"}
-      # {:francis, "~> 0.1.8"},
+      # {:francis, "~> 0.1.8"}
     ]
   end
 end

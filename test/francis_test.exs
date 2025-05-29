@@ -64,14 +64,15 @@ defmodule FrancisTest do
       path = 10 |> :crypto.strong_rand_bytes() |> Base.encode16(case: :lower)
 
       handler =
-        quote do:
-                ws(unquote(path), fn "test", socket ->
-                  send(unquote(parent_pid), {:handler, "handler_received"})
-                  send(socket.transport, "late_sent")
-                  send(socket.transport, %{key: "value"})
-                  send(socket.transport, [1, 2, 3])
-                  {:reply, "reply"}
-                end)
+        quote do
+          ws(unquote(path), fn "test", socket ->
+            send(unquote(parent_pid), {:handler, "handler_received"})
+            send(socket.transport, "late_sent")
+            send(socket.transport, %{key: "value"})
+            send(socket.transport, [1, 2, 3])
+            {:reply, "reply"}
+          end)
+        end
 
       mod = Support.RouteTester.generate_module(handler)
 
@@ -100,11 +101,12 @@ defmodule FrancisTest do
       path = 10 |> :crypto.strong_rand_bytes() |> Base.encode16(case: :lower)
 
       handler =
-        quote do:
-                ws(unquote(path), fn "test", socket ->
-                  send(unquote(parent_pid), {:handler, "handler_received"})
-                  :noreply
-                end)
+        quote do
+          ws(unquote(path), fn "test", socket ->
+            send(unquote(parent_pid), {:handler, "handler_received"})
+            :noreply
+          end)
+        end
 
       mod = Support.RouteTester.generate_module(handler)
 

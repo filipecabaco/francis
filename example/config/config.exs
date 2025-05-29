@@ -1,3 +1,3 @@
 import Config
 
-config :francis, watcher: true
+import_config "#{config_env()}.exs"

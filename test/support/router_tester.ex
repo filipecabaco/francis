@@ -1,26 +1,24 @@
 defmodule Support.RouteTester do
   @moduledoc """
-  Generates test modules with Francis to test routes in isolation
+  Generates test modules with Francis to test routes in isolation.
   """
   def generate_module(handlers \\ nil, opts \\ []) do
-    mod = "Elixir.TestMod#{random_string()}" |> String.to_atom()
+    mod = Module.concat(Elixir, "TestMod#{random_string()}")
     plugs = Keyword.get(opts, :plugs, [])
     static = Keyword.get(opts, :static)
     parser = Keyword.get(opts, :parser)
 
-    ast =
+    content =
       quote do
-        defmodule unquote(mod) do
-          use Francis,
-            plugs: unquote(plugs),
-            static: unquote(static),
-            parser: unquote(parser)
+        use Francis,
+          plugs: unquote(plugs),
+          static: unquote(static),
+          parser: unquote(parser)
 
-          unquote(handlers)
-        end
+        unquote(handlers)
       end
 
-    Code.compile_quoted(ast)
+    Module.create(mod, content, Macro.Env.location(__ENV__))
     mod
   end
 
