@@ -33,7 +33,17 @@ defmodule Francis.MixProject do
 
   defp package do
     [
-      files: ["lib", "test", "mix.exs", "README*", "LICENSE*"],
+      files: [
+        "lib",
+        "test",
+        "mix.exs",
+        "README*",
+        "LICENSE*",
+        # Ensure templates are included in the package
+        "lib/mix/tasks/francis/new/*",
+        "lib/mix/tasks/francis/new/with_supervisor/*",
+        "lib/mix/tasks/francis/new/without_supervisor/*"
+      ],
       maintainers: ["Filipe Cabaço"],
       licenses: ["MIT"],
       links: %{"GitHub" => @scm_url}
