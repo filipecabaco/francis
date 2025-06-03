@@ -1,5 +1,0 @@
-defmodule <%= Macro.camelize(@module_name)%> do
-  use Francis
-  get("/", fn _ -> "ok" end)
-  unmatched(fn _ -> "not found" end)
-end
