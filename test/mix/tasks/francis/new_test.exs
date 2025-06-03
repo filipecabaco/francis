@@ -1,16 +1,14 @@
 defmodule Mix.Tasks.Francis.NewTest do
   use ExUnit.Case, async: true
   import ExUnit.CaptureIO
-
+  alias Mix.Tasks.Francis.New
   @moduletag :tmp_dir
 
   test "creates a new project with default options", %{tmp_dir: tmp_dir} do
     File.cd!(tmp_dir, fn ->
       app_name = "my_app"
 
-      assert capture_io(fn ->
-               Mix.Tasks.Francis.New.main([app_name])
-             end) =~ ""
+      assert capture_io(fn -> New.main([app_name]) end) =~ ""
 
       assert File.dir?(app_name)
       assert File.exists?(Path.join([app_name, "mix.exs"]))
@@ -29,9 +27,7 @@ defmodule Mix.Tasks.Francis.NewTest do
     File.cd!(tmp_dir, fn ->
       app_name = "my_sup_app"
 
-      assert capture_io(fn ->
-               Mix.Tasks.Francis.New.main([app_name, "--sup"])
-             end) =~ ""
+      assert capture_io(fn -> New.main([app_name, "--sup"]) end) =~ ""
 
       assert File.dir?(app_name)
       assert File.exists?(Path.join([app_name, "lib", "application.ex"]))
@@ -49,7 +45,7 @@ defmodule Mix.Tasks.Francis.NewTest do
       File.mkdir_p!(app_name)
 
       assert_raise Mix.Error, ~r/already exists/, fn ->
-        Mix.Tasks.Francis.New.main([app_name])
+        New.main([app_name])
       end
     end)
   end
@@ -57,7 +53,7 @@ defmodule Mix.Tasks.Francis.NewTest do
   test "raises if app name is invalid", %{tmp_dir: tmp_dir} do
     File.cd!(tmp_dir, fn ->
       assert_raise Mix.Error, ~r/must only contain alphanumeric/, fn ->
-        Mix.Tasks.Francis.New.main(["bad-app!"])
+        New.main(["bad-app!"])
       end
     end)
   end

@@ -97,12 +97,7 @@ defmodule Mix.Tasks.Francis.New do
   """
   def usage, do: @moduledoc
 
-  def main(args) do
-    case run(args) do
-      :ok -> :ok
-      {:error, reason} -> Mix.raise("Error: #{reason}")
-    end
-  end
+  def main(args), do: run(args)
 
   def run([]) do
     Mix.raise("You must provide an application name, e.g. `mix francis.new my_app`")
