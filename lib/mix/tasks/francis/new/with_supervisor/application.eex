@@ -1,0 +1,12 @@
+defmodule <%= Macro.camelize(@module_name) %> do
+  use Application
+
+  def start(_type, _args) do
+    children = [
+      <%= Macro.camelize(@module_name) %>.Router
+    ]
+
+    opts = [strategy: :one_for_one, name: <%= Macro.camelize(@module_name) %>.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
+end

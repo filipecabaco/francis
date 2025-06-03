@@ -1,0 +1,5 @@
+defmodule <%= Macro.camelize(@module_name) %>.Router do
+  use Francis
+  get("/", fn _ -> "ok" end)
+  unmatched(fn _ -> "not found" end)
+end
