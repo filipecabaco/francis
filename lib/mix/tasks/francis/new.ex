@@ -17,6 +17,15 @@ defmodule Mix.Tasks.Francis.New do
       mix francis.new my_app --sup
       mix francis.new my_app --sup MyApp
   """
+  def usage, do: @moduledoc
+
+  def main(args) do
+    case run(args) do
+      :ok -> :ok
+      {:error, reason} -> Mix.raise("Error: #{reason}")
+    end
+  end
+
   def run([]) do
     Mix.raise("You must provide an application name, e.g. `mix francis.new my_app`")
   end
@@ -33,7 +42,6 @@ defmodule Mix.Tasks.Francis.New do
     {sup, supervisor_module_name} =
       OptionParser.parse!(opts, strict: [sup: :boolean, supervisor_module_name: :string])
 
-    Mix.Task.run("app.start")
     Mix.Generator.create_directory(app_name)
     root = Path.expand("../../tasks/francis", __DIR__)
 
