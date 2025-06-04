@@ -87,7 +87,7 @@ defmodule Mix.Tasks.Francis.New do
 
   ## Usage
 
-      mix francis.new <app_name> [--sup] [<supervisor_module_name>]
+      mix francis.new <app_name> [--sup [<supervisor_module_name>]]
 
   ## Examples
 
