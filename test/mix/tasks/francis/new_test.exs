@@ -104,16 +104,14 @@ defmodule Mix.Tasks.Francis.NewTest do
 
       Enum.each(valid_names, fn name ->
         # Should not raise
-        Mix.Tasks.Francis.New.main([name])
+        New.main([name])
         assert File.dir?(name)
       end)
 
       Enum.each(invalid_names, fn name ->
         assert_raise Mix.Error,
                      ~r/Application name must only contain alphanumeric characters and underscores/,
-                     fn ->
-                       Mix.Tasks.Francis.New.main([name])
-                     end
+                     fn -> New.main([name]) end
       end)
     end)
   end
