@@ -38,11 +38,7 @@ defmodule Francis.MixProject do
         "test",
         "mix.exs",
         "README*",
-        "LICENSE*",
-        # Ensure templates are included in the package
-        "lib/mix/tasks/francis/new/*",
-        "lib/mix/tasks/francis/new/with_supervisor/*",
-        "lib/mix/tasks/francis/new/without_supervisor/*"
+        "LICENSE*"
       ],
       maintainers: ["Filipe Cabaço"],
       licenses: ["MIT"],

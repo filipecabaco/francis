@@ -104,8 +104,10 @@ defmodule Mix.Tasks.Francis.New do
   end
 
   def run([app_name | opts]) do
-    if app_name =~ ~r/[^a-zA-Z0-9_]/ do
-      Mix.raise("Application name must only contain alphanumeric characters and underscores")
+    unless Regex.match?(~r/^[a-zA-Z][a-zA-Z0-9_]*$/, app_name) do
+      Mix.raise(
+        "Application name must only contain alphanumeric characters and underscores, and start with a letter"
+      )
     end
 
     if File.exists?(app_name) do
