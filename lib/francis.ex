@@ -261,8 +261,8 @@ defmodule Francis do
   defp generate_ws_module_name(path) do
     path
     |> URI.parse()
-    |> then(& &1.path)
-    |> then(&String.split(&1, "/"))
+    |> Map.get(:path)
+    |> String.split("/")
     |> Enum.map_join(".", &Macro.camelize/1)
     |> then(&Module.concat([__MODULE__, &1]))
   end
