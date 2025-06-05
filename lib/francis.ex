@@ -258,15 +258,13 @@ defmodule Francis do
   end
 
   # Private helper functions for WebSocket macro
-  # sobelow_skip ["DOS.StringToAtom"]
   defp generate_ws_module_name(path) do
     path
     |> URI.parse()
-    |> then(& &1.path)
-    |> then(&String.split(&1, "/"))
-    |> Enum.map_join(".", &String.capitalize/1)
-    |> then(&"#{__MODULE__}.#{&1}")
-    |> String.to_atom()
+    |> Map.get(:path)
+    |> String.split("/")
+    |> Enum.map_join(".", &Macro.camelize/1)
+    |> then(&Module.concat([__MODULE__, &1]))
   end
 
   defp build_ws_handler_ast(module_name, handler) do

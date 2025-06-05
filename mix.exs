@@ -22,7 +22,8 @@ defmodule Francis.MixProject do
         # Put the project-level PLT in the priv/ directory (instead of the default _build/ location)
         plt_file: {:no_warn, "priv/plts/project.plt"},
         plt_add_apps: [:mix, :iex]
-      ]
+      ],
+      escript: escript()
     ]
   end
 
@@ -32,7 +33,13 @@ defmodule Francis.MixProject do
 
   defp package do
     [
-      files: ["lib", "test", "mix.exs", "README*", "LICENSE*"],
+      files: [
+        "lib",
+        "test",
+        "mix.exs",
+        "README*",
+        "LICENSE*"
+      ],
       maintainers: ["Filipe Cabaço"],
       licenses: ["MIT"],
       links: %{"GitHub" => @scm_url}
@@ -63,6 +70,10 @@ defmodule Francis.MixProject do
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false}
     ]
+  end
+
+  defp escript do
+    [main_module: Mix.Tasks.Francis.New]
   end
 
   defp elixirc_paths(:test), do: ["lib", "test", "test/support"]
