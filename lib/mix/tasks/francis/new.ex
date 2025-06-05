@@ -117,27 +117,38 @@ defmodule Mix.Tasks.Francis.New do
     {sup, supervisor_module_name} =
       OptionParser.parse!(opts, strict: [sup: :boolean, supervisor_module_name: :string])
 
-    File.mkdir_p!(app_name)
+    Mix.Generator.create_directory(app_name)
 
     module_name =
       if supervisor_module_name == [],
         do: app_name,
         else: hd(supervisor_module_name)
 
-    # Copy and render templates
-    copy_template(:mix, "#{app_name}/mix.exs", %{module_name: module_name, app_name: app_name})
-    copy_template(:gitignore, "#{app_name}/.gitignore", %{})
+    copy_template(:mix, Path.join(app_name, "mix.exs"), %{
+      module_name: module_name,
+      app_name: app_name
+    })
 
-    File.mkdir_p!("#{app_name}/lib")
+    copy_template(:gitignore, Path.join(app_name, ".gitignore"), %{})
+
+    Mix.Generator.create_directory(Path.join(app_name, "lib"))
 
     if sup != [] && hd(sup) do
-      copy_template(:with_sup_app, "#{app_name}/lib/application.ex", %{module_name: module_name})
-      copy_template(:with_sup_router, "#{app_name}/lib/router.ex", %{module_name: module_name})
+      copy_template(:with_sup_app, Path.join([app_name, "lib", "application.ex"]), %{
+        module_name: module_name
+      })
+
+      copy_template(:with_sup_router, Path.join([app_name, "lib", "router.ex"]), %{
+        module_name: module_name
+      })
     else
-      copy_template(:without_sup_app, "#{app_name}/lib/#{app_name}.ex", %{
+      copy_template(:without_sup_app, Path.join([app_name, "lib", "#{app_name}.ex"]), %{
         module_name: module_name
       })
     end
+
+    Mix.shell().info("\nYour Francis project is ready!\n\nNext steps to start your project:")
+    Mix.shell().info("\n\tcd #{app_name}\n\tmix deps.get\n\tmix francis.server\n")
   end
 
   defp copy_template(:mix, dest, assigns), do: write_template(@mix_template, dest, assigns)
@@ -158,6 +169,6 @@ defmodule Mix.Tasks.Francis.New do
     # Make Macro available in the template context and merge assigns
     bindings = [Macro: Macro] ++ Map.to_list(assigns)
     rendered = EEx.eval_string(template, bindings)
-    File.write!(dest, rendered)
+    Mix.Generator.create_file(dest, rendered)
   end
 end
