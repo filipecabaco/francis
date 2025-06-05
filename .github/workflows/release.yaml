@@ -4,6 +4,14 @@ on:
   push:
     tags:
       - "v*.*.*"
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to build from (e.g., v1.2.3)"
+        required: true
+        default: ""
 
 permissions:
   contents: write
@@ -14,6 +22,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Checkout specified tag (manual dispatch only)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.tag != '' }}
+        run: |
+          git fetch --tags
+          git checkout ${{ inputs.tag }}
 
       - name: Set up Elixir
         uses: erlef/setup-beam@v1
