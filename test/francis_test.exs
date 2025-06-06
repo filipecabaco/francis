@@ -1,6 +1,5 @@
 defmodule FrancisTest do
   use ExUnit.Case, async: true
-  @moduletag :tmp_dir
 
   import ExUnit.CaptureLog
 
@@ -180,6 +179,7 @@ defmodule FrancisTest do
       %{static_dir: static_dir}
     end
 
+    @tag :tmp_dir
     test "returns a static file", %{static_dir: static_dir} do
       handler = quote do: unmatched(fn _ -> "" end)
 
@@ -191,6 +191,7 @@ defmodule FrancisTest do
       assert Req.get!("/app.css", plug: mod).status == 200
     end
 
+    @tag :tmp_dir
     test "returns a 404 for non-existing static file", %{static_dir: static_dir} do
       handler = quote do: unmatched(fn _ -> "" end)
 
