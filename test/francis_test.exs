@@ -168,6 +168,8 @@ defmodule FrancisTest do
   end
 
   describe "static configuration" do
+    @describetag :tmp_dir
+
     setup %{tmp_dir: tmp_dir} do
       static_dir = Path.join(tmp_dir, "static")
       File.mkdir_p!(static_dir)
@@ -179,7 +181,6 @@ defmodule FrancisTest do
       %{static_dir: static_dir}
     end
 
-    @tag :tmp_dir
     test "returns a static file", %{static_dir: static_dir} do
       handler = quote do: unmatched(fn _ -> "" end)
 
@@ -191,7 +192,6 @@ defmodule FrancisTest do
       assert Req.get!("/app.css", plug: mod).status == 200
     end
 
-    @tag :tmp_dir
     test "returns a 404 for non-existing static file", %{static_dir: static_dir} do
       handler = quote do: unmatched(fn _ -> "" end)
 
