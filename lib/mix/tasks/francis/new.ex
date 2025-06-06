@@ -50,6 +50,30 @@ defmodule Mix.Tasks.Francis.New do
   erl_crash.dump
   """
 
+  @config_template """
+  import Config
+
+  import_config "\#{config_env()}.exs"
+  """
+
+  @dev_config_template """
+  import Config
+
+  config :<%= app_name %>, watcher: true
+  """
+
+  @prod_config_template """
+  import Config
+
+  config :<%= app_name %>, watcher: false
+  """
+
+  @test_config_template """
+  import Config
+
+  config :<%= app_name %>, watcher: false
+  """
+
   @with_sup_app_template """
   defmodule <%= Macro.camelize(module_name) %> do
     use Application
@@ -133,6 +157,14 @@ defmodule Mix.Tasks.Francis.New do
 
     Mix.Generator.create_directory(Path.join(app_name, "lib"))
 
+    # Create config directory and config files
+    config_dir = Path.join(app_name, "config")
+    Mix.Generator.create_directory(config_dir)
+    copy_template(:config, Path.join(config_dir, "config.exs"), %{app_name: app_name})
+    copy_template(:dev_config, Path.join(config_dir, "dev.exs"), %{app_name: app_name})
+    copy_template(:prod_config, Path.join(config_dir, "prod.exs"), %{app_name: app_name})
+    copy_template(:test_config, Path.join(config_dir, "test.exs"), %{app_name: app_name})
+
     if sup != [] && hd(sup) do
       copy_template(:with_sup_app, Path.join([app_name, "lib", "application.ex"]), %{
         module_name: module_name
@@ -155,6 +187,18 @@ defmodule Mix.Tasks.Francis.New do
 
   defp copy_template(:gitignore, dest, assigns),
     do: write_template(@gitignore_template, dest, assigns)
+
+  defp copy_template(:config, dest, assigns),
+    do: write_template(@config_template, dest, assigns)
+
+  defp copy_template(:dev_config, dest, assigns),
+    do: write_template(@dev_config_template, dest, assigns)
+
+  defp copy_template(:prod_config, dest, assigns),
+    do: write_template(@prod_config_template, dest, assigns)
+
+  defp copy_template(:test_config, dest, assigns),
+    do: write_template(@test_config_template, dest, assigns)
 
   defp copy_template(:with_sup_app, dest, assigns),
     do: write_template(@with_sup_app_template, dest, assigns)

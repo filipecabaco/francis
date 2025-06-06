@@ -59,7 +59,13 @@ defmodule FrancisTest do
   end
 
   describe "ws/1" do
-    test "returns a response with the given body" do
+    setup do
+      port = Enum.random(5000..10_000)
+
+      %{port: port}
+    end
+
+    test "returns a response with the given body", %{port: port} do
       parent_pid = self()
       path = 10 |> :crypto.strong_rand_bytes() |> Base.encode16(case: :lower)
 
@@ -74,16 +80,17 @@ defmodule FrancisTest do
           end)
         end
 
-      mod = Support.RouteTester.generate_module(handler)
+      bandit_opts = [port: port]
+      mod = Support.RouteTester.generate_module(handler, bandit_opts: bandit_opts)
 
       assert capture_log(fn ->
                {:ok, _} = start_supervised(mod)
              end) =~
-               "Running #{mod |> Module.split() |> List.last()} with Bandit #{Application.spec(:bandit, :vsn)} at 0.0.0.0:4000"
+               "Running #{mod |> Module.split() |> List.last()} with Bandit #{Application.spec(:bandit, :vsn)} at 0.0.0.0:#{port}"
 
       tester_pid =
         start_supervised!(
-          {Support.WsTester, %{url: "ws://localhost:4000/#{path}", parent_pid: parent_pid}}
+          {Support.WsTester, %{url: "ws://localhost:#{port}/#{path}", parent_pid: parent_pid}}
         )
 
       WebSockex.send_frame(tester_pid, {:text, "test"})
@@ -96,7 +103,7 @@ defmodule FrancisTest do
     end
 
     @tag :capture_log
-    test "does not return a response with the given body" do
+    test "does not return a response with the given body", %{port: port} do
       parent_pid = self()
       path = 10 |> :crypto.strong_rand_bytes() |> Base.encode16(case: :lower)
 
@@ -108,13 +115,14 @@ defmodule FrancisTest do
           end)
         end
 
-      mod = Support.RouteTester.generate_module(handler)
+      bandit_opts = [port: port]
+      mod = Support.RouteTester.generate_module(handler, bandit_opts: bandit_opts)
 
       {:ok, _} = start_supervised(mod)
 
       tester_pid =
         start_supervised!(
-          {Support.WsTester, %{url: "ws://localhost:4000/#{path}", parent_pid: parent_pid}}
+          {Support.WsTester, %{url: "ws://localhost:#{port}/#{path}", parent_pid: parent_pid}}
         )
 
       WebSockex.send_frame(tester_pid, {:text, "test"})
@@ -160,23 +168,36 @@ defmodule FrancisTest do
   end
 
   describe "static configuration" do
-    test "returns a static file" do
+    @describetag :tmp_dir
+
+    setup %{tmp_dir: tmp_dir} do
+      static_dir = Path.join(tmp_dir, "static")
+      File.mkdir_p!(static_dir)
+
+      css_path = Path.join(static_dir, "app.css")
+      File.write!(css_path, "body { color: #333; }\n")
+
+      on_exit(fn -> File.rm(css_path) end)
+      %{static_dir: static_dir}
+    end
+
+    test "returns a static file", %{static_dir: static_dir} do
       handler = quote do: unmatched(fn _ -> "" end)
 
       mod =
         Support.RouteTester.generate_module(handler,
-          static: [at: "/", from: "test/support/priv/static/"]
+          static: [at: "/", from: static_dir]
         )
 
       assert Req.get!("/app.css", plug: mod).status == 200
     end
 
-    test "returns a 404 for non-existing static file" do
+    test "returns a 404 for non-existing static file", %{static_dir: static_dir} do
       handler = quote do: unmatched(fn _ -> "" end)
 
       mod =
         Support.RouteTester.generate_module(handler,
-          static: [at: "/", from: "test/support/static"]
+          static: [at: "/", from: static_dir]
         )
 
       assert Req.get!("/not_found.txt", plug: mod).status == 404

@@ -16,7 +16,13 @@ defmodule Mix.Tasks.Francis.NewTest do
       assert File.dir?(Path.join([app_name, "lib"]))
       assert File.exists?(Path.join([app_name, "lib", "#{app_name}.ex"]))
 
-      # Check content
+      config_dir = Path.join([app_name, "config"])
+      assert File.dir?(config_dir)
+      assert File.exists?(Path.join([config_dir, "config.exs"]))
+      assert File.exists?(Path.join([config_dir, "dev.exs"]))
+      assert File.exists?(Path.join([config_dir, "prod.exs"]))
+      assert File.exists?(Path.join([config_dir, "test.exs"]))
+
       mix_content = File.read!(Path.join([app_name, "mix.exs"]))
       assert mix_content =~ "defmodule MyApp.MixProject"
       assert mix_content =~ ":my_app"
@@ -32,6 +38,14 @@ defmodule Mix.Tasks.Francis.NewTest do
       assert File.dir?(app_name)
       assert File.exists?(Path.join([app_name, "lib", "application.ex"]))
       assert File.exists?(Path.join([app_name, "lib", "router.ex"]))
+
+      config_dir = Path.join([app_name, "config"])
+      assert File.dir?(config_dir)
+      assert File.exists?(Path.join([config_dir, "config.exs"]))
+      assert File.exists?(Path.join([config_dir, "dev.exs"]))
+      assert File.exists?(Path.join([config_dir, "prod.exs"]))
+      assert File.exists?(Path.join([config_dir, "test.exs"]))
+
       app_content = File.read!(Path.join([app_name, "lib", "application.ex"]))
       assert app_content =~ "use Application"
       router_content = File.read!(Path.join([app_name, "lib", "router.ex"]))
@@ -44,13 +58,19 @@ defmodule Mix.Tasks.Francis.NewTest do
       app_name = "my_sup_app2"
       custom_module = "CustomApp"
 
-      assert capture_io(fn ->
-               New.main([app_name, "--sup", custom_module])
-             end) =~ ""
+      assert capture_io(fn -> New.main([app_name, "--sup", custom_module]) end) =~ ""
 
       assert File.dir?(app_name)
       assert File.exists?(Path.join([app_name, "lib", "application.ex"]))
       assert File.exists?(Path.join([app_name, "lib", "router.ex"]))
+
+      config_dir = Path.join([app_name, "config"])
+      assert File.dir?(config_dir)
+      assert File.exists?(Path.join([config_dir, "config.exs"]))
+      assert File.exists?(Path.join([config_dir, "dev.exs"]))
+      assert File.exists?(Path.join([config_dir, "prod.exs"]))
+      assert File.exists?(Path.join([config_dir, "test.exs"]))
+
       app_content = File.read!(Path.join([app_name, "lib", "application.ex"]))
       assert app_content =~ "defmodule CustomApp do"
       assert app_content =~ "CustomApp.Router"
@@ -103,8 +123,7 @@ defmodule Mix.Tasks.Francis.NewTest do
       ]
 
       Enum.each(valid_names, fn name ->
-        # Should not raise
-        New.main([name])
+        capture_io(fn -> New.main([name]) end)
         assert File.dir?(name)
       end)
 
@@ -113,6 +132,40 @@ defmodule Mix.Tasks.Francis.NewTest do
                      ~r/Application name must only contain alphanumeric characters and underscores/,
                      fn -> New.main([name]) end
       end)
+    end)
+  end
+
+  defp assert_server_starts(app_name, opts \\ []) do
+    capture_io(fn -> New.main([app_name | opts]) end)
+
+    File.cd!(app_name, fn ->
+      {_, exit_code} = System.cmd("mix", ["deps.get"])
+      assert exit_code == 0
+      {_, exit_code} = System.cmd("mix", ["compile"])
+      assert exit_code == 0
+
+      port = Port.open({:spawn, "mix francis.server"}, [:binary, :stderr_to_stdout])
+      assert_receive {^port, {:data, data}}, 1000
+      assert data =~ "Running" and data =~ "Bandit"
+      Port.close(port)
+    end)
+  end
+
+  test "check server starts with default options", %{tmp_dir: tmp_dir} do
+    File.cd!(tmp_dir, fn ->
+      assert_server_starts("my_app_server_test")
+    end)
+  end
+
+  test "check server starts with --sup", %{tmp_dir: tmp_dir} do
+    File.cd!(tmp_dir, fn ->
+      assert_server_starts("my_sup_app_server_test", ["--sup"])
+    end)
+  end
+
+  test "check server starts with --sup and custom module", %{tmp_dir: tmp_dir} do
+    File.cd!(tmp_dir, fn ->
+      assert_server_starts("my_sup_app2_server_test", ["--sup", "CustomAppServerTest"])
     end)
   end
 end

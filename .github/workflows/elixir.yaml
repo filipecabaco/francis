@@ -20,8 +20,8 @@ jobs:
       # Specify the OTP and Elixir versions to use when building
       # and running the workflow steps.
       matrix:
-        otp: ["25.0.4"] # Define the OTP version [required]
-        elixir: ["1.14.1"] # Define the elixir version [required]
+        otp: ["27.3.4"] # Define the OTP version [required]
+        elixir: ["1.18.4"] # Define the elixir version [required]
     steps:
       # Step: Setup Elixir + Erlang image as the base.
       - name: Set up Elixir
@@ -141,7 +141,7 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Fetch main branch
-        run: git fetch origin main:refs/remotes/origin/main
+        run: git fetch origin main
 
       - name: Get version in main branch
         id: main_version
