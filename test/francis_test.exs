@@ -60,7 +60,7 @@ defmodule FrancisTest do
 
   describe "ws/1" do
     setup do
-      port = Enum.random(5000..10000)
+      port = Enum.random(5000..10_000)
 
       %{port: port}
     end

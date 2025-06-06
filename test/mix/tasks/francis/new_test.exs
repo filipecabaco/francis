@@ -136,7 +136,7 @@ defmodule Mix.Tasks.Francis.NewTest do
   end
 
   defp assert_server_starts(app_name, opts \\ []) do
-    capture_io(fn -> Mix.Tasks.Francis.New.main([app_name | opts]) end)
+    capture_io(fn -> New.main([app_name | opts]) end)
 
     File.cd!(app_name, fn ->
       {_, exit_code} = System.cmd("mix", ["deps.get"])
