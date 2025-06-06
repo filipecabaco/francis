@@ -141,7 +141,7 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Fetch main branch
-        run: git fetch origin main:refs/remotes/origin/main
+        run: git fetch origin main
 
       - name: Get version in main branch
         id: main_version
