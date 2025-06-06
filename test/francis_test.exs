@@ -1,5 +1,6 @@
 defmodule FrancisTest do
   use ExUnit.Case, async: true
+  @moduletag :tmp_dir
 
   import ExUnit.CaptureLog
 
@@ -168,23 +169,34 @@ defmodule FrancisTest do
   end
 
   describe "static configuration" do
-    test "returns a static file" do
+    setup %{tmp_dir: tmp_dir} do
+      static_dir = Path.join(tmp_dir, "static")
+      File.mkdir_p!(static_dir)
+
+      css_path = Path.join(static_dir, "app.css")
+      File.write!(css_path, "body { color: #333; }\n")
+
+      on_exit(fn -> File.rm(css_path) end)
+      %{static_dir: static_dir}
+    end
+
+    test "returns a static file", %{static_dir: static_dir} do
       handler = quote do: unmatched(fn _ -> "" end)
 
       mod =
         Support.RouteTester.generate_module(handler,
-          static: [at: "/", from: "test/support/priv/static/"]
+          static: [at: "/", from: static_dir]
         )
 
       assert Req.get!("/app.css", plug: mod).status == 200
     end
 
-    test "returns a 404 for non-existing static file" do
+    test "returns a 404 for non-existing static file", %{static_dir: static_dir} do
       handler = quote do: unmatched(fn _ -> "" end)
 
       mod =
         Support.RouteTester.generate_module(handler,
-          static: [at: "/", from: "test/support/static"]
+          static: [at: "/", from: static_dir]
         )
 
       assert Req.get!("/not_found.txt", plug: mod).status == 404
