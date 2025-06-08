@@ -23,6 +23,8 @@ defmodule Mix.Tasks.Francis.NewTest do
       assert File.exists?(Path.join([config_dir, "prod.exs"]))
       assert File.exists?(Path.join([config_dir, "test.exs"]))
 
+      assert File.exists?(Path.join([app_name, ".formatter.exs"]))
+
       mix_content = File.read!(Path.join([app_name, "mix.exs"]))
       assert mix_content =~ "defmodule MyApp.MixProject"
       assert mix_content =~ ":my_app"

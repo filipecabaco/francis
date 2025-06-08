@@ -105,6 +105,12 @@ defmodule Mix.Tasks.Francis.New do
   end
   """
 
+  @formatter_template """
+  [
+    inputs: ["{config,lib,test}/**/*.{ex,exs}"]
+  ]
+  """
+
   @moduledoc """
   Generates a new Francis project.
   This task creates a new directory with the specified application name and a basic project structure.
@@ -165,6 +171,8 @@ defmodule Mix.Tasks.Francis.New do
     copy_template(:prod_config, Path.join(config_dir, "prod.exs"), %{app_name: app_name})
     copy_template(:test_config, Path.join(config_dir, "test.exs"), %{app_name: app_name})
 
+    copy_template(:formatter, Path.join(app_name, ".formatter.exs"), %{})
+
     if sup != [] && hd(sup) do
       copy_template(:with_sup_app, Path.join([app_name, "lib", "application.ex"]), %{
         module_name: module_name
@@ -183,7 +191,8 @@ defmodule Mix.Tasks.Francis.New do
     Mix.shell().info("\n\tcd #{app_name}\n\tmix deps.get\n\tmix francis.server\n")
   end
 
-  defp copy_template(:mix, dest, assigns), do: write_template(@mix_template, dest, assigns)
+  defp copy_template(:mix, dest, assigns),
+    do: write_template(@mix_template, dest, assigns)
 
   defp copy_template(:gitignore, dest, assigns),
     do: write_template(@gitignore_template, dest, assigns)
@@ -208,6 +217,9 @@ defmodule Mix.Tasks.Francis.New do
 
   defp copy_template(:without_sup_app, dest, assigns),
     do: write_template(@without_sup_app_template, dest, assigns)
+
+  defp copy_template(:formatter, dest, assigns),
+    do: write_template(@formatter_template, dest, assigns)
 
   defp write_template(template, dest, assigns) do
     # Make Macro available in the template context and merge assigns
