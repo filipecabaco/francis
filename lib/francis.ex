@@ -91,7 +91,7 @@ defmodule Francis do
             |> halt()
 
           {:error, res} ->
-            handle_errors(conn, res)
+            handle_errors(conn, {:error, res})
         end
       rescue
         e -> handle_errors(conn, e)

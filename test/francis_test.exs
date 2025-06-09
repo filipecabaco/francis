@@ -213,7 +213,7 @@ defmodule FrancisTest do
 
       defmodule ErrorHandler do
         import Plug.Conn
-        def error(conn, _), do: send_resp(conn, 502, "custom error")
+        def error(conn, {:error, :fail}), do: send_resp(conn, 502, "custom error")
       end
 
       mod = Support.RouteTester.generate_module(handler, error_handler: &ErrorHandler.error/2)
@@ -238,7 +238,7 @@ defmodule FrancisTest do
           assert response.body == "Internal Server Error"
         end)
 
-      assert log =~ "Unhandled error: :fail"
+      assert log =~ "Unhandled error: {:error, :fail}"
     end
 
     test "handles exceptions with custom error handler" do
