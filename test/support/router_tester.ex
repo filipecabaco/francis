@@ -8,6 +8,7 @@ defmodule Support.RouteTester do
     static = Keyword.get(opts, :static)
     parser = Keyword.get(opts, :parser)
     bandit_opts = Keyword.get(opts, :bandit_opts, [])
+    error_handler = Keyword.get(opts, :error_handler)
 
     content =
       quote do
@@ -15,7 +16,8 @@ defmodule Support.RouteTester do
           plugs: unquote(plugs),
           static: unquote(static),
           parser: unquote(parser),
-          bandit_opts: unquote(bandit_opts)
+          bandit_opts: unquote(bandit_opts),
+          error_handler: unquote(error_handler)
 
         unquote(handlers)
       end
