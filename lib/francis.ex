@@ -133,6 +133,10 @@ defmodule Francis do
           handler ->
             Keyword.get(unquote(opts), :error_handler).(conn, reason)
         end
+      rescue
+        e ->
+          Logger.error("Error occurred: #{inspect(e)}")
+          send_resp(conn, 500, "Internal Server Error")
       end
     end
   end

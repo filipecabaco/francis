@@ -42,6 +42,48 @@ config :francis, watcher: true
 
 It defaults to `false`
 
+## Error Handling
+
+By default, Francis will return a 500 error with the message "Internal Server Error" if you return a tuple `{:error, any()}` or an exception is raised during the request handling.
+
+### Unmatched Routes
+
+If a request does not match any defined route, you can use the `unmatched/1` macro to define a custom response:
+
+```elixir
+unmatched(fn _conn -> "not found" end)
+```
+
+### Custom Error Responses
+
+For more advanced error handling, you can setup a custom error handler by providing the function that will handle the errors of your application:
+
+```elixir
+defmodule Example do
+  use Francis, error_handler: &__MODULE__.error/2
+
+  get("/", fn _ -> {:error, :potato} end)
+
+  def error(conn,{:error, :failed}) do
+    # Return a custom response
+    Plug.Conn.send_resp(conn, 502, "Custom error response")
+  end
+end
+```
+
+If you do not handle errors explicitly, Francis will catch them and return a 500 response.
+
+## Example of a router
+
+```elixir
+defmodule Example do
+  use Francis
+
+  get("/", fn _ -> "<html>world</html>" end)
+```
+
+If you do not handle errors explicitly, Francis will catch them and return a 500 response.
+
 ## Example of a router
 
 ```elixir
@@ -105,4 +147,4 @@ defmodule Example do
 end
 ```
 
-Check the folder [example](https://github.com/filipecabaco/francis/tree/main/example) to check the code.
+Check the folder [example](https://github.com/filipeccabaco/francis/tree/main/example) to check the code.

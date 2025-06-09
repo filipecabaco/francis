@@ -283,5 +283,23 @@ defmodule FrancisTest do
 
       assert log =~ "Unhandled error: %RuntimeError{message: \"test exception\"}"
     end
+
+    test "handles unmatched errors gracefully" do
+      handler =
+        quote do
+          get("/", fn _ -> {:error, :fail} end)
+        end
+
+      defmodule ErrorHandler do
+        import Plug.Conn
+        def error(conn, {:error, :no_match}), do: send_resp(conn, 404, "custom not found error")
+      end
+
+      mod = Support.RouteTester.generate_module(handler, error_handler: &ErrorHandler.error/2)
+
+      response = Req.get!("/", plug: mod, retry: false)
+      assert response.status == 500
+      assert response.body == "Internal Server Error"
+    end
   end
 end
