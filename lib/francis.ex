@@ -22,18 +22,6 @@ defmodule Francis do
     * :static - Configure Plug.Static to serve static files
     * :parser - Overrides the default configuration for Plug.Parsers
     * :error_handler - Defines a custom error handler for the server
-      * This function receives the `Plug.Conn` and the error reason as parameters and should return a `Plug.Conn` with the response.
-        ```elixir
-        defmodule Example do
-          use Francis, error_handler: &Example.error/2
-
-          def error(conn, reason) do
-            conn
-            |> put_status(500)
-            |> send_resp(500, "Internal Server Error")
-          end
-        end
-        ```
   """
   import Plug.Conn
 
@@ -41,6 +29,9 @@ defmodule Francis do
     quote location: :keep do
       use Application
       use Plug.ErrorHandler
+      use Francis.Plug.Router
+
+      require Logger
 
       def start, do: start(nil, nil)
 
@@ -56,6 +47,8 @@ defmodule Francis do
         Supervisor.start_link(children, strategy: :one_for_one)
       end
 
+      defoverridable(start: 2)
+
       def child_spec(opts) do
         %{
           id: __MODULE__,
@@ -66,8 +59,6 @@ defmodule Francis do
           modules: [__MODULE__]
         }
       end
-
-      defoverridable(start: 2)
 
       @spec handle_response(
               (Plug.Conn.t() -> binary() | map() | Plug.Conn.t()),
@@ -97,7 +88,48 @@ defmodule Francis do
         e -> handle_errors(conn, e)
       end
 
-      use Francis.Plug.Router
+      @doc """
+      Redirects the connection to the specified path with a 302 status code.
+      You can specify a different status code by passing the `:status` option.
+      ## Examples
+
+      ```
+      redirect(conn, "/new_path")
+      redirect(conn, "/new_path", status: 301)
+      ```
+
+      """
+      @spec redirect(Plug.Conn.t(), String.t(), keyword()) :: Plug.Conn.t()
+      def redirect(conn, path, opts \\ []) do
+        status = Keyword.get(opts, :status, 302)
+
+        conn
+        |> put_resp_header("location", path)
+        |> send_resp(status, "")
+        |> halt()
+      end
+
+      @spec handle_errors(Plug.Conn.t(), any()) :: Plug.Conn.t()
+      @impl true
+      def handle_errors(conn, reason) do
+        case Keyword.get(unquote(opts), :error_handler) do
+          nil ->
+            Logger.error("Unhandled error: #{inspect(reason)}")
+
+            conn
+            |> put_status(500)
+            |> send_resp(500, "Internal Server Error")
+            |> halt()
+
+          handler ->
+            Keyword.get(unquote(opts), :error_handler).(conn, reason)
+        end
+      rescue
+        e ->
+          Logger.error("Error occurred: #{inspect(e)}")
+          send_resp(conn, 500, "Internal Server Error")
+      end
+
       static = Keyword.get(unquote(opts), :static)
       if static, do: plug(Plug.Static, static)
       parser = Keyword.get(unquote(opts), :parser)
@@ -118,26 +150,6 @@ defmodule Francis do
       end)
 
       plug(:dispatch)
-
-      @impl Plug.ErrorHandler
-      defp handle_errors(conn, reason) do
-        case Keyword.get(unquote(opts), :error_handler) do
-          nil ->
-            Logger.error("Unhandled error: #{inspect(reason)}")
-
-            conn
-            |> put_status(500)
-            |> send_resp(500, "Internal Server Error")
-            |> halt()
-
-          handler ->
-            Keyword.get(unquote(opts), :error_handler).(conn, reason)
-        end
-      rescue
-        e ->
-          Logger.error("Error occurred: #{inspect(e)}")
-          send_resp(conn, 500, "Internal Server Error")
-      end
     end
   end
 

@@ -1,7 +1,7 @@
 defmodule Francis.MixProject do
   use Mix.Project
 
-  @version "0.1.17"
+  @version "0.1.18"
   @scm_url "https://github.com/francis-build/francis"
 
   def project do
