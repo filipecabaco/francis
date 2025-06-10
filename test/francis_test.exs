@@ -203,4 +203,103 @@ defmodule FrancisTest do
       assert Req.get!("/not_found.txt", plug: mod).status == 404
     end
   end
+
+  describe "error_handler option" do
+    test "invokes custom error handler on error" do
+      handler =
+        quote do
+          get("/", fn _ -> {:error, :fail} end)
+        end
+
+      defmodule ErrorHandler do
+        import Plug.Conn
+        def error(conn, {:error, :fail}), do: send_resp(conn, 502, "custom error")
+      end
+
+      mod = Support.RouteTester.generate_module(handler, error_handler: &ErrorHandler.error/2)
+
+      response = Req.get!("/", plug: mod, retry: false)
+      assert response.status == 502
+      assert response.body == "custom error"
+    end
+
+    test "invokes default error handler on error" do
+      handler =
+        quote do
+          get("/", fn _ -> {:error, :fail} end)
+        end
+
+      mod = Support.RouteTester.generate_module(handler)
+
+      log =
+        capture_log(fn ->
+          response = Req.get!("/", plug: mod, retry: false)
+          assert response.status == 500
+          assert response.body == "Internal Server Error"
+        end)
+
+      assert log =~ "Unhandled error: {:error, :fail}"
+    end
+
+    test "handles exceptions with custom error handler" do
+      handler =
+        quote do
+          get("/", fn _ -> raise "test exception" end)
+        end
+
+      defmodule CustomErrorHandler do
+        import Plug.Conn
+
+        def handle_errors(conn, _assigns) do
+          send_resp(conn, 500, "Custom Error Handler: Exception occurred")
+        end
+      end
+
+      mod =
+        Support.RouteTester.generate_module(handler,
+          error_handler: &CustomErrorHandler.handle_errors/2
+        )
+
+      response = Req.get!("/", plug: mod, retry: false)
+      assert response.status == 500
+      assert response.body == "Custom Error Handler: Exception occurred"
+    end
+
+    test "handles exceptions with default error handler" do
+      handler =
+        quote do
+          get("/", fn _ -> raise "test exception" end)
+        end
+
+      mod = Support.RouteTester.generate_module(handler)
+
+      log =
+        capture_log(fn ->
+          response = Req.get!("/", plug: mod, retry: false)
+
+          assert response.status == 500
+          assert response.body == "Internal Server Error"
+        end)
+
+      assert log =~ "Unhandled error: %RuntimeError{message: \"test exception\"}"
+    end
+
+    test "handles unmatched errors gracefully" do
+      handler =
+        quote do
+          get("/", fn _ -> {:error, :fail} end)
+        end
+
+      defmodule ErrorHandler do
+        import Plug.Conn
+        def error(conn, {:error, :no_match}), do: send_resp(conn, 404, "custom not found error")
+      end
+
+      mod = Support.RouteTester.generate_module(handler, error_handler: &ErrorHandler.error/2)
+
+      response = Req.get!("/", plug: mod, retry: false)
+      assert response.status == 500
+      assert response.body == "Internal Server Error"
+    end
+  end
 end
