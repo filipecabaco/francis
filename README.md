@@ -1,8 +1,8 @@
 # Francis
 
 [![Hex version badge](https://img.shields.io/hexpm/v/francis.svg)](https://hex.pm/packages/francis)
-[![License badge](https://img.shields.io/hexpm/l/repo_example.svg)](https://github.com/filipecabaco/francis/blob/master/LICENSE.md)
-[![Elixir CI](https://github.com/filipecabaco/francis/actions/workflows/elixir.yaml/badge.svg)](https://github.com/filipecabaco/francis/actions/workflows/elixir.yaml)
+[![License badge](https://img.shields.io/hexpm/l/repo_example.svg)](https://github.com/francis-build/francis/blob/master/LICENSE.md)
+[![Elixir CI](https://github.com/francis-build/francis/actions/workflows/elixir.yaml/badge.svg)](https://github.com/francis-build/francis/actions/workflows/elixir.yaml)
 
 Simple boilerplate killer using Plug and Bandit inspired by [Sinatra](https://sinatrarb.com) for Ruby.
 
@@ -147,4 +147,4 @@ defmodule Example do
 end
 ```
 
-Check the folder [example](https://github.com/filipeccabaco/francis/tree/main/example) to check the code.
+Check the folder [example](https://github.com/francis-build/francis/tree/main/example) to check the code.
