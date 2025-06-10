@@ -174,15 +174,15 @@ defmodule Mix.Tasks.Francis.New do
     copy_template(:formatter, Path.join(app_name, ".formatter.exs"), %{})
 
     if sup != [] && hd(sup) do
-      copy_template(:with_sup_app, Path.join([app_name, "lib", "application.ex"]), %{
+      copy_template(:with_sup_app, Path.join([app_name, "lib", app_name, "application.ex"]), %{
         module_name: module_name
       })
 
-      copy_template(:with_sup_router, Path.join([app_name, "lib", "router.ex"]), %{
+      copy_template(:with_sup_router, Path.join([app_name, "lib", app_name, "router.ex"]), %{
         module_name: module_name
       })
     else
-      copy_template(:without_sup_app, Path.join([app_name, "lib", "#{app_name}.ex"]), %{
+      copy_template(:without_sup_app, Path.join([app_name, "lib", app_name, "#{app_name}.ex"]), %{
         module_name: module_name
       })
     end

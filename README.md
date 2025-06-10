@@ -78,7 +78,7 @@ With the `static` option, you are able to setup the options for `Plug.Static` to
 
 ```elixir
 defmodule Example do
-  use Francis, static: [from: "pric/static", to: "/"]
+  use Francis, static: [from: "priv/static", at: "/"]
 end
 ```
 

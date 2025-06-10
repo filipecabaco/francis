@@ -13,8 +13,8 @@ defmodule Mix.Tasks.Francis.NewTest do
       assert File.dir?(app_name)
       assert File.exists?(Path.join([app_name, "mix.exs"]))
       assert File.exists?(Path.join([app_name, ".gitignore"]))
-      assert File.dir?(Path.join([app_name, "lib"]))
-      assert File.exists?(Path.join([app_name, "lib", "#{app_name}.ex"]))
+      assert File.dir?(Path.join([app_name, "lib", app_name]))
+      assert File.exists?(Path.join([app_name, "lib", app_name, "#{app_name}.ex"]))
 
       config_dir = Path.join([app_name, "config"])
       assert File.dir?(config_dir)
@@ -38,8 +38,8 @@ defmodule Mix.Tasks.Francis.NewTest do
       assert capture_io(fn -> New.main([app_name, "--sup"]) end) =~ ""
 
       assert File.dir?(app_name)
-      assert File.exists?(Path.join([app_name, "lib", "application.ex"]))
-      assert File.exists?(Path.join([app_name, "lib", "router.ex"]))
+      assert File.exists?(Path.join([app_name, "lib", app_name, "application.ex"]))
+      assert File.exists?(Path.join([app_name, "lib", app_name, "router.ex"]))
 
       config_dir = Path.join([app_name, "config"])
       assert File.dir?(config_dir)
@@ -48,9 +48,9 @@ defmodule Mix.Tasks.Francis.NewTest do
       assert File.exists?(Path.join([config_dir, "prod.exs"]))
       assert File.exists?(Path.join([config_dir, "test.exs"]))
 
-      app_content = File.read!(Path.join([app_name, "lib", "application.ex"]))
+      app_content = File.read!(Path.join([app_name, "lib", app_name, "application.ex"]))
       assert app_content =~ "use Application"
-      router_content = File.read!(Path.join([app_name, "lib", "router.ex"]))
+      router_content = File.read!(Path.join([app_name, "lib", app_name, "router.ex"]))
       assert router_content =~ "use Francis"
     end)
   end
@@ -63,8 +63,8 @@ defmodule Mix.Tasks.Francis.NewTest do
       assert capture_io(fn -> New.main([app_name, "--sup", custom_module]) end) =~ ""
 
       assert File.dir?(app_name)
-      assert File.exists?(Path.join([app_name, "lib", "application.ex"]))
-      assert File.exists?(Path.join([app_name, "lib", "router.ex"]))
+      assert File.exists?(Path.join([app_name, "lib", app_name, "application.ex"]))
+      assert File.exists?(Path.join([app_name, "lib", app_name, "router.ex"]))
 
       config_dir = Path.join([app_name, "config"])
       assert File.dir?(config_dir)
@@ -73,10 +73,10 @@ defmodule Mix.Tasks.Francis.NewTest do
       assert File.exists?(Path.join([config_dir, "prod.exs"]))
       assert File.exists?(Path.join([config_dir, "test.exs"]))
 
-      app_content = File.read!(Path.join([app_name, "lib", "application.ex"]))
+      app_content = File.read!(Path.join([app_name, "lib", app_name, "application.ex"]))
       assert app_content =~ "defmodule CustomApp do"
       assert app_content =~ "CustomApp.Router"
-      router_content = File.read!(Path.join([app_name, "lib", "router.ex"]))
+      router_content = File.read!(Path.join([app_name, "lib", app_name, "router.ex"]))
       assert router_content =~ "defmodule CustomApp.Router do"
     end)
   end
