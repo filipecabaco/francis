@@ -152,7 +152,6 @@ defmodule Mix.Tasks.Francis.NewTest do
   test "check server starts with default options", %{tmp_dir: tmp_dir} do
     File.cd!(tmp_dir)
     port = assert_server_starts("my_app_server_test")
-    on_exit(fn -> Port.close(port) end)
 
     assert_receive {^port, {:data, data}}, 1000
     assert data =~ "Running" and data =~ "Bandit"
@@ -161,7 +160,6 @@ defmodule Mix.Tasks.Francis.NewTest do
   test "check server starts with --sup", %{tmp_dir: tmp_dir} do
     File.cd!(tmp_dir)
     port = assert_server_starts("my_sup_app_server_test", ["--sup"])
-    on_exit(fn -> Port.close(port) end)
 
     assert_receive {^port, {:data, data}}, 1000
     assert data =~ "Running" and data =~ "Bandit"
@@ -170,7 +168,6 @@ defmodule Mix.Tasks.Francis.NewTest do
   test "check server starts with --sup and custom module", %{tmp_dir: tmp_dir} do
     File.cd!(tmp_dir)
     port = assert_server_starts("my_sup_app2_server_test", ["--sup", "CustomAppServerTest"])
-    on_exit(fn -> Port.close(port) end)
 
     assert_receive {^port, {:data, data}}, 1000
     assert data =~ "Running" and data =~ "Bandit"
