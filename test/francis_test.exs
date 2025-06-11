@@ -9,7 +9,7 @@ defmodule FrancisTest do
     test "returns a response with the given body" do
       handler = quote do: get("/", fn _ -> "test" end)
       mod = Support.RouteTester.generate_module(handler)
-      Macro.to_string(mod) |> IO.inspect()
+      Macro.to_string(mod)
 
       assert Req.get!("/", plug: mod).body == "test"
     end
