@@ -133,6 +133,47 @@ defmodule FrancisTest do
     end
   end
 
+  describe "redirect/2" do
+    test "redirects to the given path" do
+      handler =
+        quote do
+          get("/", fn conn -> redirect(conn, "/new_path") end)
+        end
+
+      mod = Support.RouteTester.generate_module(handler)
+      response = Req.get!("/", plug: mod, redirect: false)
+
+      assert response.status == 302
+      assert response.headers["location"] == ["/new_path"]
+    end
+
+    test "redirects to the given URL" do
+      handler =
+        quote do
+          get("/", fn conn -> redirect(conn, "http://example.com/new_path") end)
+        end
+
+      mod = Support.RouteTester.generate_module(handler)
+      response = Req.get!("/", plug: mod, redirect: false)
+
+      assert response.status == 302
+      assert response.headers["location"] == ["http://example.com/new_path"]
+    end
+
+    test "redirects with a 301 status" do
+      handler =
+        quote do
+          get("/", fn conn -> redirect(conn, "/new_path", status: 301) end)
+        end
+
+      mod = Support.RouteTester.generate_module(handler)
+      response = Req.get!("/", plug: mod, redirect: false)
+
+      assert response.status == 301
+      assert response.headers["location"] == ["/new_path"]
+    end
+  end
+
   describe "unmatched/1" do
     test "returns a response with the given body" do
       handler = quote do: unmatched(fn _ -> "test" end)
@@ -290,12 +331,15 @@ defmodule FrancisTest do
           get("/", fn _ -> {:error, :fail} end)
         end
 
-      defmodule ErrorHandler do
+      defmodule ErrorHandlerUnmatched do
         import Plug.Conn
         def error(conn, {:error, :no_match}), do: send_resp(conn, 404, "custom not found error")
       end
 
-      mod = Support.RouteTester.generate_module(handler, error_handler: &ErrorHandler.error/2)
+      mod =
+        Support.RouteTester.generate_module(handler,
+          error_handler: &ErrorHandlerUnmatched.error/2
+        )
 
       response = Req.get!("/", plug: mod, retry: false)
       assert response.status == 500
