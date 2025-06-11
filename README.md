@@ -15,7 +15,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 ```elixir
 def deps do
   [
-    {:francis, "~> 0.1.0"}
+    {:francis, "~> 0.1"}
   ]
 end
 ```
@@ -30,14 +30,14 @@ To create the Dockerfile that can be used for deployment you can run:
 mix francis.release
 ```
 
-## Watcher
+## Dev mode
 
-If you want to have a watcher that will reload the server when you change your code:
+If you want to have a watcher that will reload the server when you change your code you can use the `dev` configuration option:
 
 ```elixir
 import Config
 
-config :francis, watcher: true
+config :francis, dev: true
 ```
 
 It defaults to `false`

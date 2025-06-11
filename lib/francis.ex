@@ -27,15 +27,27 @@ defmodule Francis do
   defmacro __using__(opts \\ []) do
     quote location: :keep do
       use Application
+
       use Plug.ErrorHandler
       use Francis.Plug.Router
       require Logger
 
       def start, do: start(nil, nil)
 
+      static = Keyword.get(unquote(opts), :static)
+      parser = Keyword.get(unquote(opts), :parser)
+
+      if static, do: plug(Plug.Static, static)
+
+      if parser,
+        do: plug(Plug.Parsers, parser),
+        else: plug(Plug.Parsers, parsers: [:urlencoded, :multipart, :json], json_decoder: Jason)
+
+      plug(Plug.Head)
+
       def start(_type, _args) do
-        watcher_spec =
-          if Application.get_env(:francis, :watcher, false), do: [{Francis.Watcher, []}], else: []
+        dev = Application.get_env(:francis, :dev, false)
+        watcher_spec = if dev, do: [{Francis.Watcher, []}], else: []
 
         children =
           [
@@ -127,21 +139,6 @@ defmodule Francis do
           Logger.error("Error occurred: #{inspect(e)}")
           send_resp(conn, 500, "Internal Server Error")
       end
-
-      static = Keyword.get(unquote(opts), :static)
-      if static, do: plug(Plug.Static, static)
-      parser = Keyword.get(unquote(opts), :parser)
-
-      if parser do
-        plug(Plug.Parsers, parser)
-      else
-        plug(Plug.Parsers,
-          parsers: [:urlencoded, :multipart, :json],
-          json_decoder: Jason
-        )
-      end
-
-      plug(Plug.Head)
     end
   end
 
