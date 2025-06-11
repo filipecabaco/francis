@@ -9,6 +9,7 @@ defmodule FrancisTest do
     test "returns a response with the given body" do
       handler = quote do: get("/", fn _ -> "test" end)
       mod = Support.RouteTester.generate_module(handler)
+      Macro.to_string(mod) |> IO.inspect()
 
       assert Req.get!("/", plug: mod).body == "test"
     end
@@ -189,12 +190,13 @@ defmodule FrancisTest do
   describe "plug usage" do
     test "uses given plug by given order" do
       handler =
-        quote do: get("/", fn %{assigns: %{plug_assgined: plug_assgined}} -> plug_assgined end)
+        quote do
+          plug(Support.PlugTester, to_assign: "plug1")
+          plug(Support.PlugTester, to_assign: "plug2")
+          get("/", fn %{assigns: %{plug_assgined: plug_assgined}} -> plug_assgined end)
+        end
 
-      plug1 = {Support.PlugTester, to_assign: "plug1"}
-      plug2 = {Support.PlugTester, to_assign: "plug2"}
-
-      mod = Support.RouteTester.generate_module(handler, plugs: [plug1, plug2])
+      mod = Support.RouteTester.generate_module(handler)
       assert Req.get!("/", plug: mod).body == ["plug1", "plug2"]
     end
   end

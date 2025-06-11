@@ -5,6 +5,13 @@ defmodule Francis.Plug.Router do
   alias Plug.Conn.WrapperError
   alias Plug.Router.Utils
 
+  defmacro __before_compile__(_env) do
+    quote location: :keep do
+      plug(:match)
+      plug(:dispatch)
+    end
+  end
+
   defmacro __using__(opts) do
     quote location: :keep do
       import Francis
@@ -12,6 +19,7 @@ defmodule Francis.Plug.Router do
 
       @plug_router_to %{}
       @before_compile Plug.Router
+      @before_compile Francis.Plug.Router
 
       use Plug.Builder, unquote(opts)
       import Plug.Router, except: [get: 2, post: 2, put: 2, delete: 2, patch: 2, head: 2]

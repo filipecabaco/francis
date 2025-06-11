@@ -136,7 +136,9 @@ authentication on all routes
 defmodule Example do
   import Plug.BasicAuth
 
-  use Francis, plugs: [{:basic_auth, username: "test", password: "test"}]
+  use Francis
+
+  plug(:basic_auth, username: "test", password: "test")
 
   get("/", fn _ -> "<html>world</html>" end)
   get("/:name", fn %{params: %{"name" => name}} -> "hello #{name}" end)
@@ -146,5 +148,31 @@ defmodule Example do
   unmatched(fn _ -> "not found" end)
 end
 ```
+## Example of multiple routers
+You can also define multiple routers in your application by using the `forward/2` function provided by [Plug](https://hexdocs.pm/plug/Plug.Router.html#forward/2) .
 
+For example, you can have an authenticated router and a public router.
+
+```elixir
+defmodule Public do
+  use Francis
+  get("/", fn _ -> "ok" end)
+end
+
+defmodule Private do
+  use Francis
+  import Plug.BasicAuth
+  plug(:basic_auth, username: "test", password: "test")
+  get("/", fn _ -> "hello" end)
+end
+
+defmodule TestApp do
+  use Francis
+
+  forward("/path1", to: Public)
+  forward("/path2", to: Private)
+
+  unmatched(fn _ -> "not found" end)
+end
+```
 Check the folder [example](https://github.com/francis-build/francis/tree/main/example) to check the code.

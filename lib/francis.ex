@@ -18,7 +18,6 @@ defmodule Francis do
 
   You can also set the following options:
     * :bandit_opts - Options to be passed to Bandit
-    * :plugs - List of plugs to be used by Francis
     * :static - Configure Plug.Static to serve static files
     * :parser - Overrides the default configuration for Plug.Parsers
     * :error_handler - Defines a custom error handler for the server
@@ -30,7 +29,6 @@ defmodule Francis do
       use Application
       use Plug.ErrorHandler
       use Francis.Plug.Router
-
       require Logger
 
       def start, do: start(nil, nil)
@@ -133,7 +131,6 @@ defmodule Francis do
       static = Keyword.get(unquote(opts), :static)
       if static, do: plug(Plug.Static, static)
       parser = Keyword.get(unquote(opts), :parser)
-      plug(:match)
 
       if parser do
         plug(Plug.Parsers, parser)
@@ -144,12 +141,7 @@ defmodule Francis do
         )
       end
 
-      Enum.each(Keyword.get(unquote(opts), :plugs, []), fn
-        plug when is_atom(plug) -> plug(plug)
-        {plug, opts} when is_atom(plug) -> plug(plug, opts)
-      end)
-
-      plug(:dispatch)
+      plug(Plug.Head)
     end
   end
 
@@ -171,7 +163,6 @@ defmodule Francis do
   @spec get(String.t(), (Plug.Conn.t() -> binary() | map() | Plug.Conn.t())) :: Macro.t()
   defmacro get(path, handler) do
     quote location: :keep do
-      Plug.Router.head(unquote(path), do: handle_response(unquote(handler), var!(conn)))
       Plug.Router.get(unquote(path), do: handle_response(unquote(handler), var!(conn)))
     end
   end
