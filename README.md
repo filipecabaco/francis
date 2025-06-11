@@ -30,14 +30,14 @@ To create the Dockerfile that can be used for deployment you can run:
 mix francis.release
 ```
 
-## Watcher
+## Dev mode
 
-If you want to have a watcher that will reload the server when you change your code:
+If you want to have a watcher that will reload the server when you change your code you can use the `dev` configuration option:
 
 ```elixir
 import Config
 
-config :francis, watcher: true
+config :francis, dev: true
 ```
 
 It defaults to `false`

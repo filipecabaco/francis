@@ -59,19 +59,19 @@ defmodule Mix.Tasks.Francis.New do
   @dev_config_template """
   import Config
 
-  config :<%= app_name %>, watcher: true
+  config :francis, dev: true
   """
 
   @prod_config_template """
   import Config
 
-  config :<%= app_name %>, watcher: false
+  config :francis, dev: false
   """
 
   @test_config_template """
   import Config
 
-  config :<%= app_name %>, watcher: false
+  config :francis, dev: false
   """
 
   @with_sup_app_template """
